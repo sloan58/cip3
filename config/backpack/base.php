@@ -16,7 +16,7 @@ return [
 
     // Menu logos
     'logo_lg'   => '<b>CIP</b>3',
-    'logo_mini' => '<b>CIP3</b>p',
+    'logo_mini' => '<b>CIP3</b>',
 
     // Developer or company name. Shown in footer.
     'developer_name' => 'Marty Sloan',
