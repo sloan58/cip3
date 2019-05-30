@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "722585ecfd68d8c449189bcbb179a5a2",
+    "content-hash": "58ccc33f425a3eb8ac8c2f4df6943c05",
     "packages": [
         {
             "name": "almasaeed2010/adminlte",
@@ -4154,6 +4154,57 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "ajthinking/tinx",
+            "version": "v2.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/furey/tinx.git",
+                "reference": "d1d13799e740ad689620479ec010270a8da46d0c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/furey/tinx/zipball/d1d13799e740ad689620479ec010270a8da46d0c",
+                "reference": "d1d13799e740ad689620479ec010270a8da46d0c",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/container": "^5.2",
+                "laravel/tinker": "~1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.4|^7.0"
+            },
+            "type": "laravel",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Ajthinking\\Tinx\\TinxServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ajthinking\\Tinx\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Anders Jürisoo",
+                    "email": "jurisoo@hotmail.com"
+                },
+                {
+                    "name": "James Furey",
+                    "homepage": "https://github.com/furey"
+                }
+            ],
+            "description": "Reload your Laravel Tinker session from inside Tinker, plus magic shortcuts for first(), find(), where(), and more!",
+            "time": "2019-03-22T07:43:50+00:00"
+        },
         {
             "name": "backpack/generators",
             "version": "1.2.7",

@@ -93,7 +93,7 @@ class AxlSoap extends SoapClient
             return true;
 
         } catch (SoapFault $e) {
-            Log::error('AxlSoap@ping ({$this->ucm->name}): UCM Ping fail', [
+            Log::error("AxlSoap@ping ({$this->ucm->name}): UCM Ping fail", [
                 $e->getMessage()
             ]);
             return false;
@@ -105,18 +105,30 @@ class AxlSoap extends SoapClient
      */
     public function syncPhones()
     {
+        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Running syncPhones");
+
         $returnedTags = [
                 'name' => '',
                 'description' => '',
                 'model' => '',
                 'devicePoolName' => ''
         ];
-        
+        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Set listPhone returnedTags ", [ $returnedTags ]);
+
+        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Checking for throttle scenario", [
+            'throttle' => $this->chunk
+        ]);
         if ($this->chunk) {
             $returnedTags['skip'] = $this->skip;
             $returnedTags['first'] = $this->suggestedRows;
+            Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): We are currently throttling.  " .
+                "Setting skip and first parameters for listPhone", [
+                    'skip' => $this->skip,
+                    'first' => $this->suggestedRows
+            ]);
         }
-        
+
+        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Calling listPhone API");
         try {
             $res = $this->listPhone([
                     'searchCriteria' => [
@@ -126,53 +138,39 @@ class AxlSoap extends SoapClient
                 ]
             );
 
-            // Process the AXL response data
-            // If the top response element is an array, we have multiple records
+            Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Received good listPhone response");
             if (isset($res->return->phone)) {
-                $iterate = is_array($res->return->phone) ? $res->return->phone : [$res->return->phone ];
-                foreach ($iterate as $item) {
-                    Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Processing item", [$item->name]);
-                    Phone::firstOrCreate(
-                        [
-                            'uuid' => preg_replace('/[{}]/', '', $item->uuid),
-                            'ucm_id' => $this->ucm->id
-                        ],
-                        [
-                            'name' => $item->name,
-                            'description' => $item->description,
-                            'model' => $item->model,
-                            'device_pool' => $item->devicePoolName->_
-                        ]
-                    );
-                }
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Response has interesting data");
+
+                $iterate = is_array($res->return->phone) ? $res->return->phone : [ $res->return->phone ];
+
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Set IP Phone array to store locally");
+                Log::debug("AxlSoap:@syncPhones ({$this->ucm->name}): ListPhone response objects", [ $iterate ]);
+
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Calling storePhoneData method");
+                $this->storePhoneData($iterate);
             }
 
             return true;
 
         } catch (SoapFault $e) {
-            // If we received a throttle notification, chunk our queries
             if (preg_match('/Query request too large/', $e->faultstring)) {
 
                 Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Received throttle notification from AXL");
 
-                // Get the Total Rows matched and the Suggested Rows from the Error Response
                 preg_match_all('/[0-9]+/', $e->faultstring, $matches);
-
-                // Set chunk to true
-                $this->chunk = true;
-
-                // Total matched rows
                 $this->totalRows = $matches[0][0];
                 Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Total matches is $this->totalRows");
 
-                // Suggested maximum rows per query
+                $this->chunk = true;
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Setting chunk (throttle) to true");
+
                 $this->suggestedRows = floor($matches[0][1] / 10);
                 Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Suggested rows is {$matches[0][1]}");
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Setting limit to $this->suggestedRows (1/10th) " .
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Set limit to $this->suggestedRows (1/10th) " .
                                   "to avoid a recursive throttle."
                 );
 
-                // How many iterations to get all rows
                 $this->iterations =  floor($this->totalRows / $this->suggestedRows) +1;
                 Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Iterations is $this->iterations");
 
@@ -189,12 +187,17 @@ class AxlSoap extends SoapClient
                 }
                 $this->resetThrottle();
             } else {
-                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Request ", [$this->__getLastRequest()]);
-                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Response ", [$this->__getLastResponse()]);
+                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Request ", [
+                    $this->__getLastRequest()
+                ]);
+                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Response ", [
+                    $this->__getLastResponse()
+                ]);
 
-                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): AXL SOAP Exception thrown.  Tearing down sync process.");
+                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): AXL SOAP Exception thrown.  " .
+                                   "Tearing down sync process.");
 
-                exit;
+                exit(1);
             }
         }
 
@@ -212,5 +215,31 @@ class AxlSoap extends SoapClient
         $this->chunk = false;
         $this->totalRows = 0;
         $this->iterations = 0;
+    }
+
+    /**
+     * @param array $iterate
+     */
+    protected function storePhoneData(array $iterate): void
+    {
+        Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Iterating items for local storage");
+        foreach ($iterate as $item) {
+            Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Processing item", [$item->name]);
+            $phone = Phone::firstOrCreate(
+                [
+                    'name' => $item->name,
+                    'ucm_id' => $this->ucm->id
+                ],
+                [
+                    'description' => $item->description,
+                    'model' => $item->model,
+                    'device_pool' => $item->devicePoolName->_
+                ]
+            );
+            Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Stored Item", [
+                'phoneId' => $phone->id
+            ]);
+        }
+        Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Iterating items completed.  Done!");
     }
 }

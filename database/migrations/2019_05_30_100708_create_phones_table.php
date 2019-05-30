@@ -15,11 +15,11 @@ class CreatePhonesTable extends Migration
     {
         Schema::create('phones', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('uuid');
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('model');
             $table->string('device_pool');
+            $table->json('realtime_data')->nullable();
             $table->unsignedBigInteger('ucm_id')->index();
             $table->foreign('ucm_id')
                 ->references('id')
@@ -27,7 +27,7 @@ class CreatePhonesTable extends Migration
                 ->onDelete('cascade');
             $table->timestamps();
 
-            $table->unique(['uuid', 'ucm_id']);
+            $table->unique(['name', 'ucm_id']);
         });
     }
 

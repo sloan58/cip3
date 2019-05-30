@@ -20,6 +20,7 @@
         "shipping-docker/vessel": "^4.0"
     },
     "require-dev": {
+        "ajthinking/tinx": "^2.3",
         "backpack/generators": "^1.2",
         "beyondcode/laravel-dump-server": "^1.0",
         "filp/whoops": "^2.0",
