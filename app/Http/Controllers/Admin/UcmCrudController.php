@@ -116,6 +116,8 @@ class UcmCrudController extends CrudController
             ]
         ]);
 
+        $this->crud->setEditView('ucm.edit');
+
         // add asterisk for fields that are required in UcmRequest
         $this->crud->setRequiredFields(StoreRequest::class, 'create');
         $this->crud->setRequiredFields(UpdateRequest::class, 'edit');
