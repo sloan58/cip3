@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Ucm;
+use Backpack\CRUD\CrudPanel;
+use App\Http\Requests\UcmRequest as StoreRequest;
+use App\Http\Requests\UcmRequest as UpdateRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 
 // VALIDATION: change the requests to match your own file names if you need form validation
-use App\Http\Requests\UcmRequest as StoreRequest;
-use App\Http\Requests\UcmRequest as UpdateRequest;
-use Backpack\CRUD\CrudPanel;
 
 /**
  * Class UcmCrudController
@@ -33,32 +34,85 @@ class UcmCrudController extends CrudController
         |--------------------------------------------------------------------------
         */
 
-        $this->crud->setColumns([
-            'Name',
-            'IP Address',
-            'Username',
-        ]);
-        
-        $this->crud->addFields([
+//        $this->crud->setColumns([
+//            'Name',
+//            'IP Address',
+//            'Username',
+//            'Version'
+//        ]);
+
+        $this->crud->addColumns([
             [
                 'name' => 'name',
                 'type' => 'text',
-                'label' => "UCM name"
+                'label' => 'Name',
             ],
             [
                 'name' => 'ip_address',
                 'type' => 'text',
-                'label' => "UCM IP Address"
+                'label' => 'IP Address',
+            ],
+            [
+                'name' => 'version',
+                'type' => 'text',
+                'label' => 'API Version',
+            ],
+        ]);
+
+        $this->crud->addFields([
+            [
+                'name' => 'name',
+                'type' => 'text',
+                'label' => 'Name'
+            ],
+            [
+                'name' => 'ip_address',
+                'type' => 'text',
+                'label' => 'IP Address'
             ],
             [
                 'name' => 'username',
                 'type' => 'text',
-                'label' => "Username"
+                'label' => 'API Username'
             ],
             [
                 'name' => 'password',
                 'type' => 'password',
-                'label' => "Password"
+                'label' => 'API Password'
+            ],
+            [
+                'name' => 'version',
+                'type' => 'select_from_array',
+                'label' => 'API Version',
+                'options' => array_combine(
+                    Ucm::getApiVersions(),
+                    Ucm::getApiVersions()
+                )
+            ],
+            [
+                'name' => 'timezone',
+                'type' => 'select_from_array',
+                'label' => 'Timezone',
+                'options' => array_combine(
+                    timezone_identifiers_list(),
+                    timezone_identifiers_list()
+                )
+            ],
+            [
+                'name' => 'sync_at',
+                'type' => 'time',
+                'label' => 'Perform Sync At'
+            ],
+            [
+                'name' => 'sync_enabled',
+                'type' => 'checkbox',
+                'label' => 'Daily Sync Enabled',
+                'default' => 1
+            ],
+            [
+                'name' => 'verify_peer',
+                'type' => 'checkbox',
+                'label' => 'Validate Certificate'
             ]
         ]);
 
@@ -78,7 +132,11 @@ class UcmCrudController extends CrudController
 
     public function update(UpdateRequest $request)
     {
-        // your additional operations before save here
+        // Encrypt password if specified.
+        if (!$request->input('password')) {
+            $request->request->remove('password');
+        }
+
         $redirect_location = parent::updateCrud($request);
         // your additional operations after save here
         // use $this->data['entry'] or $this->crud->entry

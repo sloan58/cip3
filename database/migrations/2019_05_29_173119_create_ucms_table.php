@@ -18,14 +18,15 @@ class CreateUcmsTable extends Migration
             $table->string('name')->unique();
             $table->string('ip_address')->unique();
             $table->string('username');
-            $table->string('password');
+            $table->text('password');
             $table->string('timezone')->default('US/Eastern');
             $table->string('version');
             $table->boolean('verify_peer')->default(0);
             $table->boolean('locked_for_sync')->default(0);
-            $table->string('scheduled_runtime')->nullable();
-            $table->timestamp('last_sync_started')->nullable()->default(null);
-            $table->timestamp('last_sync_completed')->nullable()->default(null);
+            $table->time('sync_at');
+            $table->boolean('sync_enabled')->default(1);
+            $table->timestamp('last_sync_started')->nullable();
+            $table->timestamp('last_sync_completed')->nullable();
             $table->timestamps();
         });
     }

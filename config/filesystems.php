@@ -64,6 +64,11 @@ return [
             'url' => env('AWS_URL'),
         ],
 
+        'wsdl' => [
+            'driver' => 'local',
+            'root' => storage_path('wsdl/axl')
+        ],
+
     ],
 
 ];
