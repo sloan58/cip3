@@ -4,6 +4,8 @@ namespace App\ApiClients;
 
 use SoapFault;
 use SoapClient;
+use App\Models\Ucm;
+use App\Models\Phone;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -43,32 +45,28 @@ class AxlSoap extends SoapClient
     private $loop;
     
     /**
-     * @var string
+     * @var Ucm
      */
-    private $ip;
+    private $ucm;
 
     /**
-     * @param $version
-     * @param $ip
-     * @param $user
-     * @param $password
-     * @param bool $verifyPeer
+     * @param Ucm $ucm
      * @throws SoapFault
      */
-    public function __construct($version, $ip, $user, $password, $verifyPeer = true)
+    public function __construct(Ucm $ucm)
     {
-        $this->ip = $ip;
+        $this->ucm = $ucm;
         
-        $wsdl = storage_path('wsdl/axl/') . $version . '/AXLAPI.wsdl';
+        $wsdl = storage_path('wsdl/axl/') . $this->ucm->version . '/AXLAPI.wsdl';
 
         parent::__construct($wsdl,
             [
                 'trace' => true,
                 'exceptions' => true,
-                'location' => "https://{$ip}:8443/axl/",
-                'login' => $user,
-                'password' => $password,
-                'stream_context' => $verifyPeer ?: stream_context_create([
+                'location' => "https://{$this->ucm->ip_address}:8443/axl/",
+                'login' => $this->ucm->username,
+                'password' => $this->ucm->password,
+                'stream_context' => $this->ucm->verify_peer ?: stream_context_create([
                     'ssl' => [
                         'verify_peer' => false,
                         'verify_peer_name' => false,
@@ -89,13 +87,13 @@ class AxlSoap extends SoapClient
         try {
             $res = $this->getCCMVersion();
 
-            Log::info("AxlSoap@ping ($this->ip): UCM Ping success", [
+            Log::info("AxlSoap@ping ({$this->ucm->name}): UCM Ping success", [
                 'version' => $res->return->componentVersion->version
             ]);
             return true;
 
         } catch (SoapFault $e) {
-            Log::error('AxlSoap@ping ($this->ip): UCM Ping fail', [
+            Log::error('AxlSoap@ping ({$this->ucm->name}): UCM Ping fail', [
                 $e->getMessage()
             ]);
             return false;
@@ -127,14 +125,25 @@ class AxlSoap extends SoapClient
                     'returnedTags' => $returnedTags
                 ]
             );
-            dump($res);
 
             // Process the AXL response data
             // If the top response element is an array, we have multiple records
             if (isset($res->return->phone)) {
                 $iterate = is_array($res->return->phone) ? $res->return->phone : [$res->return->phone ];
                 foreach ($iterate as $item) {
-                    Log::info("AxlSoap:@syncPhones ($this->ip): Processing item", [$item->name]);
+                    Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Processing item", [$item->name]);
+                    Phone::firstOrCreate(
+                        [
+                            'uuid' => preg_replace('/[{}]/', '', $item->uuid),
+                            'ucm_id' => $this->ucm->id
+                        ],
+                        [
+                            'name' => $item->name,
+                            'description' => $item->description,
+                            'model' => $item->model,
+                            'device_pool' => $item->devicePoolName->_
+                        ]
+                    );
                 }
             }
 
@@ -144,7 +153,7 @@ class AxlSoap extends SoapClient
             // If we received a throttle notification, chunk our queries
             if (preg_match('/Query request too large/', $e->faultstring)) {
 
-                Log::error("AxlSoap:@syncPhones ($this->ip): Received throttle notification from AXL");
+                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Received throttle notification from AXL");
 
                 // Get the Total Rows matched and the Suggested Rows from the Error Response
                 preg_match_all('/[0-9]+/', $e->faultstring, $matches);
@@ -154,36 +163,36 @@ class AxlSoap extends SoapClient
 
                 // Total matched rows
                 $this->totalRows = $matches[0][0];
-                Log::info("AxlSoap:@syncPhones ($this->ip): Total matches is $this->totalRows");
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Total matches is $this->totalRows");
 
                 // Suggested maximum rows per query
                 $this->suggestedRows = floor($matches[0][1] / 10);
-                Log::info("AxlSoap:@syncPhones ($this->ip): Suggested rows is {$matches[0][1]}");
-                Log::info("AxlSoap:@syncPhones ($this->ip): Setting limit to $this->suggestedRows (1/10th) " .
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Suggested rows is {$matches[0][1]}");
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Setting limit to $this->suggestedRows (1/10th) " .
                                   "to avoid a recursive throttle."
                 );
 
                 // How many iterations to get all rows
                 $this->iterations =  floor($this->totalRows / $this->suggestedRows) +1;
-                Log::info("AxlSoap:@syncPhones ($this->ip): Iterations is $this->iterations");
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Iterations is $this->iterations");
 
-                Log::info("AxlSoap:@syncPhones ($this->ip): Skip set to $this->skip");
+                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Skip set to $this->skip");
                 for ($this->loop = 1; $this->loop <= $this->iterations; $this->loop++) {
-                    Log::info("AxlSoap:@syncPhones ($this->ip): Querying AXL listPhones.  " .
+                    Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Querying AXL listPhones.  " .
                                       "Iteration is $this->loop out of $this->iterations"
                     );
                     $this->syncPhones();
                     $this->skip = $this->skip + $this->suggestedRows;
-                    Log::info("AxlSoap:@syncPhones ($this->ip): Processed throttle iteration.  " .
+                    Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Processed throttle iteration.  " .
                                       "Setting skip to $this->skip"
                     );
                 }
                 $this->resetThrottle();
             } else {
-                Log::error("AxlSoap:@syncPhones ($this->ip): Last AXL Request ", [$this->__getLastRequest()]);
-                Log::error("AxlSoap:@syncPhones ($this->ip): Last AXL Response ", [$this->__getLastResponse()]);
+                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Request ", [$this->__getLastRequest()]);
+                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Response ", [$this->__getLastResponse()]);
 
-                Log::error("AxlSoap:@syncPhones ($this->ip): AXL SOAP Exception thrown.  Tearing down sync process.");
+                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): AXL SOAP Exception thrown.  Tearing down sync process.");
 
                 exit;
             }
