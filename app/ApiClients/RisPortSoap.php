@@ -105,6 +105,7 @@ class RisPortSoap extends SoapClient
 
             Log::info("RisPortSoap@queryRisPort: ({$this->ucm->name}) Received successful response");
             $realtimeData = $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item->CmDevices->item;
+            dump($response);
             $this->storeRealtimeData($realtimeData);
             return true;
 
@@ -161,8 +162,10 @@ class RisPortSoap extends SoapClient
                 'DownloadStatus' => $data->DownloadStatus,
                 'DownloadFailureReason' => $data->DownloadFailureReason,
                 'IPAddress' => $data->IPAddress->item->IP,
-                'Timestamp' => Carbon::now()->timestamp
+                'UCMTimestamp' => $data->TimeStamp,
+                'CIP3Timestamp' => Carbon::now()->timestamp
             ];
+
             Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Setting current status ", [
                 'currentStatus' => $currentStatus
             ]);
