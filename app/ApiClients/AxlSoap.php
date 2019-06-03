@@ -90,12 +90,15 @@ class AxlSoap extends SoapClient
             Log::info("AxlSoap@ping ({$this->ucm->name}): UCM Ping success", [
                 'version' => $res->return->componentVersion->version
             ]);
+
             return true;
 
         } catch (SoapFault $e) {
+
             Log::error("AxlSoap@ping ({$this->ucm->name}): UCM Ping fail", [
                 $e->getMessage()
             ]);
+
             return false;
         }
     }
@@ -195,7 +198,10 @@ class AxlSoap extends SoapClient
                 ]);
 
                 Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): AXL SOAP Exception thrown.  " .
-                                   "Tearing down sync process.");
+                                   "Tearing down sync process.", [
+                    'fault code' => $e->getCode(),
+                    'fault message' => $e->getMessage()
+                ]);
 
                 exit(1);
             }

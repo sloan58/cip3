@@ -152,11 +152,16 @@ class RisPortSoap extends SoapClient
                 'phoneId' => $phone->id
             ]);
 
+            $lines = array_map(function($line) {
+                return $line->DirectoryNumber;
+            }, is_array($data->LinesStatus->item) ? $data->LinesStatus->item : [$data->LinesStatus->item]);
+
             $currentStatus = [
                 'Status' => $data->Status,
                 'StatusReason' => $data->StatusReason,
                 'Protocol' => $data->Protocol,
                 'NumOfLines' => $data->NumOfLines,
+                'Lines' => $lines,
                 'ActiveLoadID' => $data->ActiveLoadID,
                 'InactiveLoadID' => $data->InactiveLoadID,
                 'DownloadStatus' => $data->DownloadStatus,
@@ -166,6 +171,7 @@ class RisPortSoap extends SoapClient
                 'CIP3Timestamp' => Carbon::now()->timestamp
             ];
 
+            dump($currentStatus);
             Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Setting current status ", [
                 'currentStatus' => $currentStatus
             ]);

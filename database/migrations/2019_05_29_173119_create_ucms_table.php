@@ -22,11 +22,9 @@ class CreateUcmsTable extends Migration
             $table->string('timezone')->default('US/Eastern');
             $table->string('version');
             $table->boolean('verify_peer')->default(0);
-            $table->boolean('locked_for_sync')->default(0);
             $table->time('sync_at');
-            $table->boolean('sync_enabled')->default(1);
-            $table->timestamp('last_sync_started')->nullable();
-            $table->timestamp('last_sync_completed')->nullable();
+            $table->boolean('sync_schedule_enabled')->default(1);
+            $table->boolean('sync_in_progress')->default(0);
             $table->timestamps();
         });
     }
