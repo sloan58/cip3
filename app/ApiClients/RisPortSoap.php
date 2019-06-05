@@ -182,7 +182,7 @@ class RisPortSoap extends SoapClient
                     'statuses_before' => $statuses,
 
                 ]);
-                array_push($statuses, $currentStatus);
+                array_unshift($statuses, $currentStatus);
                 $phone->realtime_data = $statuses;
                 Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Adding new status to DB ", [
                     'statuses_after' => $statuses,
