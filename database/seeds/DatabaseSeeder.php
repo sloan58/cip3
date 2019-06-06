@@ -1,5 +1,7 @@
 <?php
 
+use App\User;
+use App\Models\Ucm;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -11,14 +13,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // $this->call(UsersTableSeeder::class);
-        \App\User::create([
-            'name' => 'Marty Sloan',
-            'email' => 'marty@karmatek.io',
+        User::create([
+            'name' => 'CIP3 Admin',
+            'email' => 'admin@cip3.com',
             'password' => Hash::make('password123')
         ]);
 
-        \App\Models\Ucm::create([
+        Ucm::create([
             'name' => 'CIP3 Dev',
             'ip_address' => '10.175.200.10',
             'username' => 'cip3-admin',
