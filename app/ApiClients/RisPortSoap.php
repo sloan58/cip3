@@ -88,7 +88,7 @@ class RisPortSoap extends SoapClient
      */
     private function queryRisPort($phones)
     {
-        Log::info("RisPortSoap@queryRisPort: ({$this->ucm->name}) Sending SelectCmDeviceExt request to UCM");
+        Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): Sending SelectCmDeviceExt request to UCM");
         try {
             $response = $this->SelectCmDeviceExt([
                 'StateInfo' => '',
@@ -103,14 +103,24 @@ class RisPortSoap extends SoapClient
                         $phones
                 ]]);
 
-            Log::info("RisPortSoap@queryRisPort: ({$this->ucm->name}) Received successful response");
+            Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): Received successful response");
+
+            Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): " .
+                              "Checking to see if there is any RisPort data available for devices"
+            );
+            if(!$response->selectCmDeviceReturn->SelectCmDeviceResult->TotalDevicesFound)
+            {
+                Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): No device data available to process.");
+                return true;
+            }
+
+            Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): Device data is available.");
             $realtimeData = $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item->CmDevices->item;
-            dump($response);
             $this->storeRealtimeData($realtimeData);
             return true;
 
         } catch (SoapFault $e) {
-            Log::error("RisPortSoap@queryRisPort: ({$this->ucm->name}) Received Error Response", [
+            Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): Received Error Response", [
                 [ 'faultstring' => $e->faultstring ],
                 [ 'message' => $e->getMessage() ],
                 [ 'last request' => $this->__getLastRequest() ],
@@ -121,13 +131,13 @@ class RisPortSoap extends SoapClient
             // The typo in the error message below is intended.  It's what gets sent in the response from UCM :-)
             if (preg_match('/^AxisFault: Exceeded allowed rate for Reatime information/',$e->faultstring))
             {
-                Log::error("RisPortSoap@queryRisPort: ({$this->ucm->name}) Error was a throttle response.  " .
+                Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): Error was a throttle response.  " .
                                    "Sleeping 30 seconds"
                 );
                 sleep(30);
                 $this->queryRisPort($phones);
             }
-            Log::error("RisPortSoap@queryRisPort: ({$this->ucm->name}) Error was not a throttle response.  Exiting");
+            Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): Error was not a throttle response.  Exiting");
             exit(1);
         }
     }
@@ -139,16 +149,16 @@ class RisPortSoap extends SoapClient
      */
     private function storeRealtimeData($realtimeData)
     {
-        Log::info("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Storing Realtime Data locally");
+        Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing Realtime Data locally");
         foreach($realtimeData as $data) {
 
-            Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Processing item", [ $data ]);
+            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Processing item", [ $data ]);
 
             $phone = Phone::where([
                 'name' => $data->Name,
                 'ucm_id' => $this->ucm->id
             ])->first();
-            Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Updating IP Phone ", [
+            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Updating IP Phone ", [
                 'phoneId' => $phone->id
             ]);
 
@@ -171,32 +181,32 @@ class RisPortSoap extends SoapClient
                 'CIP3Timestamp' => Carbon::now()->timestamp
             ];
 
-            Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Setting current status ", [
+            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Setting current status ", [
                 'currentStatus' => $currentStatus
             ]);
 
             if($phone->realtime_data) {
                 $statuses = $phone->realtime_data;
-                Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Adding new status to DB ", [
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Adding new status to DB ", [
                     'statuses_before' => $statuses,
 
                 ]);
                 array_unshift($statuses, $currentStatus);
                 $phone->realtime_data = $statuses;
-                Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Adding new status to DB ", [
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Adding new status to DB ", [
                     'statuses_after' => $statuses,
 
                 ]);
             } else {
-                Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) DB status is empty.  " .
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): DB status is empty.  " .
                                    "Adding current status"
                 );
                 $phone->realtime_data = [$currentStatus];
             }
 
-            Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Storing phone data");
+            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing phone data");
             $phone->save();
         }
-        Log::info("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Storing Realtime Data complete");
+        Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing Realtime Data complete");
     }
 }

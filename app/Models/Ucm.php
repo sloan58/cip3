@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Backpack\CRUD\CrudTrait;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
@@ -77,6 +78,19 @@ class Ucm extends Model
         return decrypt($value);
     }
 
+    /**
+     * Convert UTC to local TZ for display in view
+     *
+     * @param $value
+     * @return mixed
+     */
+    public function getSyncAtAttribute($value)
+    {
+        return Carbon::createFromFormat(
+            'H:i:s', $value, 'UTC'
+        )->tz($this->timezone)->toTimeString();
+    }
+
     /*
     |--------------------------------------------------------------------------
     | MUTATORS
@@ -91,4 +105,16 @@ class Ucm extends Model
     {
         $this->attributes['password'] =  encrypt($value);
     }
+
+    /**
+     * Convert local TZ to UTC before storing in database
+     *
+     * @param $value
+     */
+//    public function setSyncAtAttribute($value)
+//    {
+//        Carbon::createFromFormat(
+//            'H:i:s', $value, $this->timezone
+//        )->tz('UTC')->toTimeString();
+//    }
 }

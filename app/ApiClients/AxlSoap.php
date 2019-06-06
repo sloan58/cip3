@@ -203,6 +203,9 @@ class AxlSoap extends SoapClient
                     'fault message' => $e->getMessage()
                 ]);
 
+                $this->ucm->sync_in_progress = false;
+                $this->ucm->save();
+
                 exit(1);
             }
         }

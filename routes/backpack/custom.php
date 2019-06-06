@@ -11,6 +11,7 @@ Route::group([
     'middleware' => ['web', config('backpack.base.middleware_key', 'admin')],
     'namespace'  => 'App\Http\Controllers\Admin',
 ], function () { // custom admin routes
+    Route::get('/dashboard', 'DashboardController@index');
     Route::get('ucm/{ucm}/sync', 'UcmCrudController@sync');
     CRUD::resource('ucm', 'UcmCrudController');
     CRUD::resource('phone', 'PhoneCrudController');

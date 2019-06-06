@@ -23,6 +23,13 @@ class SyncUcmJob implements ShouldQueue
     private $ucm;
 
     /**
+     *  The number of times to attempt this job
+     *
+     * @var int
+     */
+    public $tries = 1;
+
+    /**
      * Create a new job instance.
      *
      * @param Ucm $ucm
