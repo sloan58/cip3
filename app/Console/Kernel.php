@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('ucm:sync')->everyMinute();;
         $schedule->command('telescope:prune')->daily();
     }
 

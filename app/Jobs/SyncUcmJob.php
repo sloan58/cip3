@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Facades\Log;
 use SoapFault;
 use App\Models\Ucm;
 use App\ApiClients\AxlSoap;
@@ -39,15 +40,25 @@ class SyncUcmJob implements ShouldQueue
      */
     public function handle()
     {
+        Log::info("SyncUcmJob@handle ({$this->ucm->name}): Starting Job");
 
+        Log::info(
+            "SyncUcmJob@handle ({$this->ucm->name}): Calling AXL API to sync phones"
+        );
         $axl = new AxlSoap($this->ucm);
         $axl->syncPhones();
 
+        Log::info(
+            "SyncUcmJob@handle ({$this->ucm->name}): Calling RisPort API for real time info"
+        );
         $ris = new RisPortSoap($this->ucm);
         $ris->collectRealtimeData(
             $this->ucm->phones->pluck('name')->toArray()
         );
 
+        Log::info(
+            "SyncUcmJob@handle ({$this->ucm->name}): Setting sync_in_progress = false"
+        );
         $this->ucm->sync_in_progress = false;
         $this->ucm->save();
     }

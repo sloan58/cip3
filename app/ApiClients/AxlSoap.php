@@ -108,7 +108,7 @@ class AxlSoap extends SoapClient
      */
     public function syncPhones()
     {
-        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Running syncPhones");
+        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
 
         $returnedTags = [
                 'name' => '',
@@ -116,22 +116,22 @@ class AxlSoap extends SoapClient
                 'model' => '',
                 'devicePoolName' => ''
         ];
-        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Set listPhone returnedTags ", [ $returnedTags ]);
+        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set listPhone returnedTags ", [ $returnedTags ]);
 
-        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Checking for throttle scenario", [
+        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Checking for throttle scenario", [
             'throttle' => $this->chunk
         ]);
         if ($this->chunk) {
             $returnedTags['skip'] = $this->skip;
             $returnedTags['first'] = $this->suggestedRows;
-            Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): We are currently throttling.  " .
+            Log::info("AxlSoap@syncPhones ({$this->ucm->name}): We are currently throttling.  " .
                 "Setting skip and first parameters for listPhone", [
                     'skip' => $this->skip,
                     'first' => $this->suggestedRows
             ]);
         }
 
-        Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Calling listPhone API");
+        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Calling listPhone API");
         try {
             $res = $this->listPhone([
                     'searchCriteria' => [
@@ -141,16 +141,16 @@ class AxlSoap extends SoapClient
                 ]
             );
 
-            Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Received good listPhone response");
+            Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Received good listPhone response");
             if (isset($res->return->phone)) {
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Response has interesting data");
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Response has interesting data");
 
                 $iterate = is_array($res->return->phone) ? $res->return->phone : [ $res->return->phone ];
 
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Set IP Phone array to store locally");
-                Log::debug("AxlSoap:@syncPhones ({$this->ucm->name}): ListPhone response objects", [ $iterate ]);
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set IP Phone array to store locally");
+                Log::debug("AxlSoap@syncPhones ({$this->ucm->name}): ListPhone response objects", [ $iterate ]);
 
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Calling storePhoneData method");
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Calling storePhoneData method");
                 $this->storePhoneData($iterate);
             }
 
@@ -159,45 +159,45 @@ class AxlSoap extends SoapClient
         } catch (SoapFault $e) {
             if (preg_match('/Query request too large/', $e->faultstring)) {
 
-                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Received throttle notification from AXL");
+                Log::error("AxlSoap@syncPhones ({$this->ucm->name}): Received throttle notification from AXL");
 
                 preg_match_all('/[0-9]+/', $e->faultstring, $matches);
                 $this->totalRows = $matches[0][0];
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Total matches is $this->totalRows");
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Total matches is $this->totalRows");
 
                 $this->chunk = true;
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Setting chunk (throttle) to true");
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Setting chunk (throttle) to true");
 
                 $this->suggestedRows = floor($matches[0][1] / 10);
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Suggested rows is {$matches[0][1]}");
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Set limit to $this->suggestedRows (1/10th) " .
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Suggested rows is {$matches[0][1]}");
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set limit to $this->suggestedRows (1/10th) " .
                                   "to avoid a recursive throttle."
                 );
 
                 $this->iterations =  floor($this->totalRows / $this->suggestedRows) +1;
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Iterations is $this->iterations");
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Iterations is $this->iterations");
 
-                Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Skip set to $this->skip");
+                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Skip set to $this->skip");
                 for ($this->loop = 1; $this->loop <= $this->iterations; $this->loop++) {
-                    Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Querying AXL listPhones.  " .
+                    Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Querying AXL listPhones.  " .
                                       "Iteration is $this->loop out of $this->iterations"
                     );
                     $this->syncPhones();
                     $this->skip = $this->skip + $this->suggestedRows;
-                    Log::info("AxlSoap:@syncPhones ({$this->ucm->name}): Processed throttle iteration.  " .
+                    Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Processed throttle iteration.  " .
                                       "Setting skip to $this->skip"
                     );
                 }
                 $this->resetThrottle();
             } else {
-                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Request ", [
+                Log::error("AxlSoap@syncPhones ({$this->ucm->name}): Last AXL Request ", [
                     $this->__getLastRequest()
                 ]);
-                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): Last AXL Response ", [
+                Log::error("AxlSoap@syncPhones ({$this->ucm->name}): Last AXL Response ", [
                     $this->__getLastResponse()
                 ]);
 
-                Log::error("AxlSoap:@syncPhones ({$this->ucm->name}): AXL SOAP Exception thrown.  " .
+                Log::error("AxlSoap@syncPhones ({$this->ucm->name}): AXL SOAP Exception thrown.  " .
                                    "Tearing down sync process.", [
                     'fault code' => $e->getCode(),
                     'fault message' => $e->getMessage()
@@ -228,9 +228,9 @@ class AxlSoap extends SoapClient
      */
     protected function storePhoneData(array $iterate): void
     {
-        Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Iterating items for local storage");
+        Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Iterating items for local storage");
         foreach ($iterate as $item) {
-            Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Processing item", [$item->name]);
+            Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Processing item", [$item->name]);
             $phone = Phone::firstOrCreate(
                 [
                     'name' => $item->name,
@@ -242,10 +242,10 @@ class AxlSoap extends SoapClient
                     'device_pool' => $item->devicePoolName->_
                 ]
             );
-            Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Stored Item", [
+            Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Stored Item", [
                 'phoneId' => $phone->id
             ]);
         }
-        Log::debug("AxlSoap:@storePhoneData ({$this->ucm->name}): Iterating items completed.  Done!");
+        Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Iterating items completed.  Done!");
     }
 }

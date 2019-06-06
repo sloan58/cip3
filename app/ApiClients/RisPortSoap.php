@@ -171,7 +171,6 @@ class RisPortSoap extends SoapClient
                 'CIP3Timestamp' => Carbon::now()->timestamp
             ];
 
-            dump($currentStatus);
             Log::debug("RisPortSoap@storeRealtimeData: ({$this->ucm->name}) Setting current status ", [
                 'currentStatus' => $currentStatus
             ]);
