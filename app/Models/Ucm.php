@@ -20,6 +20,9 @@ class Ucm extends Model
 
     protected $table = 'ucms';
     protected $guarded = ['id'];
+    protected $appends = [
+        'totalPhoneCount'
+    ];
 
     /*
     |--------------------------------------------------------------------------
@@ -90,6 +93,17 @@ class Ucm extends Model
             'H:i:s', $value, 'UTC'
         )->tz($this->timezone)->toTimeString();
     }
+
+    /**
+     * Return the total phone count for this Ucm
+     *
+     * @return mixed
+     */
+    public function getTotalPhoneCountAttribute()
+    {
+        return $this->phones()->count();
+    }
+
 
     /*
     |--------------------------------------------------------------------------

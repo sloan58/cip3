@@ -14,14 +14,11 @@
                     <h3 class="panel-title">UCM Phone Statistics</h3>
                 </div>
                 <div class="panel-body">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         {!! $phoneModels->render() !!}
                     </div>
-                    <div class="col-md-4">
-                        {!! $demoChart2->render() !!}
-                    </div>
-                    <div class="col-md-4">
-                        {!! $demoChart3->render() !!}
+                    <div class="col-md-6">
+                        {!! $clusterCounts->render() !!}
                     </div>
                 </div>
             </div>

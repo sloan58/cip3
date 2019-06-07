@@ -20,64 +20,11 @@ class DashboardController extends Controller
     {
         Log::info("DashboardController@index: Generating Dashboard charts");
 
-        $phoneModels = $this->buildPhoneModelsChart();
+        $phoneModels = $this->buildTop10PhoneModelsChart();
 
-        $demoChart2 = app()->chartjs
-            ->name('topContributorsChart2')
-            ->type('pie')
-            ->size(['width' => 400, 'height' => 200])
-            ->labels(['One', 'Two', 'Three'])
-            ->datasets([
-                [
-                    'backgroundColor' => RandomColor::many(count(['One', 'Two', 'Three'])),
-                    'hoverBackgroundColor' => ['#FF6384', '#36A2EB'],
-                    'data' => [1, 2, 3]
-                ]
-            ])
-            ->options([]);
+        $clusterCounts = $this->buildTotalPhoneCountChart();
 
-        $ucms = Ucm::all()->map(function($ucm) {
-            return [ $ucm->name => $ucm->phones->count() ];
-        });
-
-        $labels = $ucms->map(function($ucm) {
-            return key($ucm);
-        });
-
-        $data = $ucms->map(function($ucm) {
-            return [
-                'backgroundColor' => RandomColor::one(),
-                'hoverBackgroundColor' => ['#FF6384', '#36A2EB'],
-                'data' => end($ucm)
-            ];
-        });
-
-        dump($labels, $data);
-
-        $demoChart3 = app()->chartjs
-            ->name('topContributorsChart3')
-            ->type('bar')
-            ->size(['width' => 400, 'height' => 200])
-            ->labels(['Cluster1', 'Cluster1'])
-            ->datasets([
-                [
-                    "label" => "My First dataset",
-                    'backgroundColor' => ['rgba(255, 99, 132, 0.2)'],
-                    'data' => [69]
-                ],
-                [
-                    "label" => "My Second dataset",
-                    'backgroundColor' => ['rgba(54, 162, 235, 0.2)'],
-                    'data' => [12]
-                ]
-            ])
-            ->options([
-                'legend' => [
-                    'display' => true
-                ]
-            ]);
-
-        return view('dashboard', compact('phoneModels', 'demoChart2', 'demoChart3'));
+        return view('dashboard', compact('phoneModels', 'clusterCounts'));
     }
 
     /**
@@ -85,9 +32,9 @@ class DashboardController extends Controller
      *
      * @return mixed
      */
-    private function buildPhoneModelsChart()
+    private function buildTop10PhoneModelsChart()
     {
-        Log::info("DashboardController@buildPhoneModelsChart: Fetching data for Phone model counts");
+        Log::info("DashboardController@buildTop10PhoneModelsChart: Fetching data for top 10 Phone model counts");
         $modelsAndCounts = \DB::table('phones')
             ->select(\DB::raw('model, count(*) count'))
             ->where('model', 'LIKE', 'Cisco %')
@@ -96,7 +43,7 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        Log::info("DashboardController@buildPhoneModelsChart: Building labels and counts");
+        Log::info("DashboardController@buildTop10PhoneModelsChart: Building labels and counts");
         $labels = array_map(function ($stat) {
             return $stat->model;
         }, $modelsAndCounts->toArray());
@@ -105,7 +52,7 @@ class DashboardController extends Controller
             return $stat->count;
         }, $modelsAndCounts->toArray());
 
-        Log::info("DashboardController@buildPhoneModelsChart: Creating ChartJS phoneModels Chart");
+        Log::info("DashboardController@buildTop10PhoneModelsChart: Creating ChartJS phoneModels Chart");
         $phoneModels = app()->chartjs
             ->name('phoneModels')
             ->type('pie')
@@ -118,7 +65,55 @@ class DashboardController extends Controller
                     'data' => $counts
                 ]
             ])
-            ->options([]);
+            ->options([
+                'legend' => [
+                    'display' => true,
+                    'position' => 'left',
+                ],
+                'title' => [
+                    'display' => true,
+                    'text' => 'Phone Counts by UCM'
+                ]
+            ]);
+
         return $phoneModels;
+    }
+
+    /**
+     * Create the Dashboard total phones chart
+     *
+     * @return mixed
+     */
+    private function buildTotalPhoneCountChart()
+    {
+        Log::info("DashboardController@buildTotalPhoneCountChart: Fetching data for total Phone counts");
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Gathering all UCM records and counts");
+        $data = Ucm::all()->pluck('totalPhoneCount', 'name')->toArray();
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
+        $clusterCounts = app()->chartjs
+            ->name('clusterCounts')
+            ->type('bar')
+            ->size(['width' => 400, 'height' => 200])
+            ->labels(array_keys($data))
+            ->datasets([
+                [
+                    'backgroundColor' => RandomColor::many(count($data)),
+                    'hoverBackgroundColor' => ['#FF6384', '#36A2EB'],
+                    'data' => array_values($data)
+                ]
+            ])
+            ->options([
+                'legend' => [
+                    'display' => false
+                ],
+                'title' => [
+                    'display' => true,
+                    'text' => 'Totals'
+                ]
+            ]);
+
+        return $clusterCounts;
     }
 }
