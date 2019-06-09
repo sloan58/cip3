@@ -20,6 +20,12 @@ class DashboardController extends Controller
     {
         Log::info("DashboardController@index: Generating Dashboard charts");
 
+        if(!Ucm::count()) {
+            Log::info("DashboardController@index: There are no UCM servers.  Return noData = true");
+            $noData = true;
+            return view('dashboard', compact('noData'));
+        }
+
         $phoneModels = $this->buildTop10PhoneModelsChart();
 
         $clusterCounts = $this->buildTotalPhoneCountChart();

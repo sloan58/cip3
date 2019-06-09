@@ -132,6 +132,7 @@ class UcmCrudController extends CrudController
 
     public function store(StoreRequest $request)
     {
+        dump($request->all());
         // your additional operations before save here
         $redirect_location = parent::storeCrud($request);
 

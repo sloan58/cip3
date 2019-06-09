@@ -128,7 +128,7 @@ class Ucm extends Model
     public function setSyncAtAttribute($value)
     {
         $this->attributes['sync_at'] = Carbon::createFromFormat(
-            'H:i:s', $value, $this->timezone
+            'H:i:s', $value . ':00', $this->timezone
         )->tz('UTC')->toTimeString();
     }
 }
