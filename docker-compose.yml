@@ -30,8 +30,10 @@ services:
   queue:
       image: vessel/app
       container_name: cip3-queue
+      restart: on-failure
       depends_on:
         - app
+        - redis
       volumes:
         - .:/var/www/html
       environment:
