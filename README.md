@@ -100,7 +100,7 @@ Below are some sample screenshots after syncing my lab system.
 ![image](https://user-images.githubusercontent.com/6303820/59216225-35266580-8b89-11e9-89d6-014ce270a37a.png)
 
 #### Phone/Device Details
-![image](https://user-images.githubusercontent.com/6303820/59216320-6141e680-8b89-11e9-98a9-d9839a66d649.png)
+![image](https://user-images.githubusercontent.com/6303820/59225219-25fde280-8b9e-11e9-936b-12e91ac0c444.png)
 
 
 ## Todo
