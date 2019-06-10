@@ -5,6 +5,7 @@ services:
       context: ./docker/app
       dockerfile: Dockerfile
     image: vessel/app
+    container_name: cip3-www
     ports:
      - "${APP_PORT}:80"
     environment:
@@ -15,6 +16,28 @@ services:
      - .:/var/www/html
     networks:
      - vessel
+  scheduler:
+    image: vessel/app
+    container_name: cip3-scheduler
+    depends_on:
+      - app
+    volumes:
+      - .:/var/www/html
+    environment:
+      CONTAINER_ROLE: scheduler
+    networks:
+      - vessel
+  queue:
+      image: vessel/app
+      container_name: cip3-queue
+      depends_on:
+        - app
+      volumes:
+        - .:/var/www/html
+      environment:
+        CONTAINER_ROLE: queue
+      networks:
+        - vessel
   node:
     build:
       context: ./docker/node
@@ -22,6 +45,7 @@ services:
       args:
         uid: "${WWWUSER}"
     image: vessel/node
+    container_name: cip3-node
     user: node
     volumes:
      - .:/var/www/html
@@ -29,6 +53,7 @@ services:
      - vessel
   mysql:
     image: mysql:5.7
+    container_name: cip3-db
     ports:
      - "${MYSQL_PORT}:3306"
     environment:
