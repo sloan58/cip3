@@ -1,85 +1,125 @@
 # CIP<sup>3</sup>
-> Cisco IP Phone Portal - to track and manage your Cisco UC endpoints
+> Cisco IP Phone Portal - track and manage your Cisco UC endpoints
 
-CIP<sup>3</sup> is an open-source set of tools to help Cisco Collaboration engineers track and manage devices within their Cisco UCM clusters.
+CIP<sup>3</sup> is an open project to help Cisco Collaboration engineers track and manage devices within their Cisco UCM clusters.
 
+It uses the PHP Laravel framework and contains a Docker workflow to help you get up and running fast.
 
+The current version offers the following:
 
-This project uses the following frameworks/packages:
+- Cisco UCM Server(s) CRUD interface
+- Sync Cisco UCM Phones/Devices and RisPort data daily and on-demand
+- Display device information and real-time data (IP Address, Firmware, etc) 
+- Manage User accounts
 
-[Laravel 5.8](www.laravel.com)
+Here's some of the packages included:
 
-[Laravel Backpack](https://laravel-backpack.readme.io/docs)
+[Laravel 5.8](www.laravel.com) - the core application framework
 
-[laravel-chartjs](https://github.com/fxcosta/laravel-chartjs)
+[Laravel Telescope](https://laravel.com/docs/5.8/telescope) - an elegant debug assistant for the Laravel framework
 
+[Laravel Backpack](https://laravel-backpack.readme.io/docs) - for rapid UI prototyping
 
-![](header.png)
+[laravel-chartjs](https://github.com/fxcosta/laravel-chartjs) - build sweet looking charts in your Laravel controllers
+
+[Vessel](https://github.com/shipping-docker/vessel) - a Docker dev environment for Laravel
+
+I created this project as an opportunity to get more familiar with the Docker workflow.  If you're interested in working on this project and helping to build in some other features, please check out the *Contributing* section below.  I'd love to work with you to help build some free tools!
+
 
 ## Installation
 
+### Docker/Vessel
 OS X & Linux:
 
 ```sh
-npm install my-crazy-module --save
+git clone git@github.com:sloan58/cip3.git
+cd cip3
+cp .env.example .env
+./vessel start
+./vessel composer install
+./vessel art key:generate
+./vessel art migrate --seed
 ```
 
 Windows:
 
+*TODO*
+
+
+### Without Docker/Vessel
+
+If you're not using the Docker/Vessel integration, you'll need to have a development environment with PHP, composer and a database (and Redis, if you'd like) already installed.
+
+OS X & Linux:
+
 ```sh
-edit autoexec.bat
+git clone git@github.com:sloan58/cip3.git
+cd cip3
+cp .env.example .env
+composer install
+php artisan key:generate
+php artisan migrate --seed
 ```
+
+Windows:
+
+*TODO*
+
+### Cisco UCM Setup
+Create and account with the following Roles so that it can use the AXL and RisPort API's:
+
+- AXL
+- Standard CCM Server Monitoring
 
 ## Usage example
 
-A few motivating and useful examples of how your product can be used. Spice this up with code blocks and potentially more screenshots.
+The `.env` file will have mostly everything set for the Docker/Vessel integration.  At the bottom of the file, you can modify the `APP_PORT` and `MYSQL_PORT` if you need to run them on another port so they don't conflict with a running app.  Please see the `Multiple Environments` section in the [vessel](https://github.com/shipping-docker/vessel) docs for more.
 
-_For more examples and usage, please refer to the [Wiki][wiki]._
+Once the app is running (and if you've seeded the database) you can login with:
 
-## Development setup
+`Username:` admin@cip3.com
 
-Describe how to install all development dependencies and how to run an automated test-suite of some kind. Potentially do this for multiple platforms.
+`Password:` password123
 
-```sh
-make install
-npm test
-```
+Below are some sample screenshots after syncing my lab system.
 
-## Release History
+### Screenshots
 
-* 0.2.1
-    * CHANGE: Update docs (module code remains unchanged)
-* 0.2.0
-    * CHANGE: Remove `setDefaultXYZ()`
-    * ADD: Add `init()`
-* 0.1.1
-    * FIX: Crash when calling `baz()` (Thanks @GenerousContributorName!)
-* 0.1.0
-    * The first proper release
-    * CHANGE: Rename `foo()` to `bar()`
-* 0.0.1
-    * Work in progress
+#### Dashboard
+![image](https://user-images.githubusercontent.com/6303820/59216094-e4af0800-8b88-11e9-919c-086ee2f6d62f.png)
 
-## Meta
+#### UCM List
+![image](https://user-images.githubusercontent.com/6303820/59216141-014b4000-8b89-11e9-9e9f-72ea60d524d1.png)
 
-Your Name – [@YourTwitter](https://twitter.com/dbader_org) – YourEmail@example.com
+#### UCM Add/Edit
+![image](https://user-images.githubusercontent.com/6303820/59216225-35266580-8b89-11e9-89d6-014ce270a37a.png)
 
-Distributed under the XYZ license. See ``LICENSE`` for more information.
+#### Phone/Device Details
+![image](https://user-images.githubusercontent.com/6303820/59216320-6141e680-8b89-11e9-98a9-d9839a66d649.png)
 
-[https://github.com/yourname/github-link](https://github.com/dbader/)
 
+## Todo
+
+- Create some roles and permissions
+- Create a docker-compose file that pulls in the app, rather than the app pulling in Docker
+- Better exception handling.  Right now, AXL sync exceptions might go unnoticed.  I'd like to generate an email/notification to an admin with the details.
+- Email integration
+- LDAP integration - I've used the [adldap2 package](https://github.com/Adldap2/Adldap2) before, which works nicely.
+- Tests, for goodness' sake!
+
+## New Features / Wish List
+- UCM CURRI Integration for selective call blocking - I have code if anyone wants to help integrate.
+- UCM CDR's - import CDR's into CIP<sup>3</sup> and attach them to the devices for search/visibility.  I have a bash script to import into MySQL but an Elasticsearch container would be great!
+- UCM Audit Logs - Correlate audit log events with devices in CIP<sup>3</sup> (Elasticsearch again?)
+- Custom IP Phone Background images - I have code for this to get started.  It accepts an uploaded file and converts the image to the necessary formats for a list of IP Phones (and the thumbnails), then pushes them out using the `setBackground` API
+- UCM PerfMon integration - I have some starter code that syncs PerfMon Objects and Classes.  Multi-cluster DB replication status perhaps?
+- Call Recording - I have call recording with Asterisk working as a POC, but it needs some significant work to make it basically useful.  I can share my Asterisk `extensions.conf` and `sip.conf`.  This is pretty ambitious but would be awesome to have an open-source recording solution for UCM!
+   
 ## Contributing
 
-1. Fork it (<https://github.com/yourname/yourproject/fork>)
+1. Fork it (<https://github.com/sloan58/cip3>)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
 5. Create a new Pull Request
-
-<!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
-[wiki]: https://github.com/yourname/yourproject/wiki
