@@ -24,10 +24,14 @@ Here's some of the packages included:
 
 [Vessel](https://github.com/shipping-docker/vessel) - a Docker dev environment for Laravel
 
-I created this project as an opportunity to get more familiar with the Docker workflow.  If you're interested in working on this project and helping to build in some other features, please check out the *Contributing* section below.  I'd love to work with you to help build some free tools!
+I created this project as an opportunity to get more familiar with the Docker workflow.  If you're interested in working on this project and helping to build in some other features, please check out the *Contributing* section below.  I'd love to work with you to help build some free tools!  Also, please send any suggestions if there's a feature you'd like to see.
 
 
 ## Installation
+
+After installing, your app will be reachable on your host IP at the port specified in the `.env` file (port 8000 by default)
+
+`http://<your_ip>:8000`
 
 ### Docker/Vessel
 OS X & Linux:
