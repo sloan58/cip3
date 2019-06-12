@@ -4,6 +4,7 @@ namespace App\ApiClients;
 
 use SoapFault;
 use SoapClient;
+use Carbon\Carbon;
 use App\Models\Ucm;
 use App\Models\Phone;
 use Illuminate\Support\Facades\Log;
@@ -203,6 +204,12 @@ class AxlSoap extends SoapClient
                     'fault message' => $e->getMessage()
                 ]);
 
+                $this->ucm->updateSyncHistory(
+                    false,
+                    Carbon::now()->timestamp,
+                    $e->getCode(),
+                    $e->getMessage()
+                );
                 $this->ucm->sync_in_progress = false;
                 $this->ucm->save();
 

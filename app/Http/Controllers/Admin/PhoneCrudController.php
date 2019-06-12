@@ -109,6 +109,6 @@ class PhoneCrudController extends CrudController
         $this->data['crud'] = $this->crud;
 
         // load the view from /resources/views/vendor/backpack/crud/ if it exists, otherwise load the one in the package
-        return view('crud::details_row', $this->data);
+        return view('crud::phones.details_row', $this->data);
     }
 }

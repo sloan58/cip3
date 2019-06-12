@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use SoapFault;
 use App\Models\Ucm;
@@ -67,6 +68,12 @@ class SyncUcmJob implements ShouldQueue
             "SyncUcmJob@handle ({$this->ucm->name}): Setting sync_in_progress = false"
         );
         $this->ucm->sync_in_progress = false;
+
+        Log::info(
+            "SyncUcmJob@handle ({$this->ucm->name}): Updating sync history"
+        );
+        $this->ucm->updateSyncHistory(true, Carbon::now()->timestamp);
+
         $this->ucm->save();
     }
 }

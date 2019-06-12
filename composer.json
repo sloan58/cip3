@@ -10,6 +10,7 @@
     "require": {
         "php": "^7.1.3",
         "ext-soap": "*",
+        "ext-json": "*",
         "backpack/crud": "^3.6",
         "backpack/permissionmanager": "^4.0",
         "barryvdh/laravel-elfinder": "^0.4.2",

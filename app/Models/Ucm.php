@@ -19,9 +19,12 @@ class Ucm extends Model
     */
 
     protected $table = 'ucms';
-    protected $guarded = ['id'];
+    protected $guarded = ['id', 'sync_history'];
     protected $appends = [
         'totalPhoneCount'
+    ];
+    protected $casts = [
+        'sync_history' => 'array'
     ];
 
     /*
@@ -42,6 +45,26 @@ class Ucm extends Model
         arsort($versions);
 
         return $versions;
+    }
+
+    /**
+     * @param $sync_completed
+     * @param $timestamp
+     * @param null $errorMessage
+     * @param null $errorCode
+     */
+    public function updateSyncHistory($sync_completed, $timestamp, $errorCode = null, $errorMessage = null)
+    {
+        $history = (array) $this->sync_history;
+        array_unshift($history, [
+            'sync_completed' => $sync_completed,
+            'timestamp' => $timestamp,
+            'error_code' => $errorCode,
+            'error_message' => $errorMessage
+        ]);
+
+        $this->sync_history = $history;
+        dump($history, $this->sync_history);
     }
 
     /*
@@ -110,6 +133,7 @@ class Ucm extends Model
     | MUTATORS
     |--------------------------------------------------------------------------
     */
+
     /**
      * Encrypt the CUCM Password when setting
      *
@@ -118,6 +142,21 @@ class Ucm extends Model
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] =  encrypt($value);
+    }
+
+    /**
+     * Return an empty sync_history array if null
+     *
+     * @param $value
+     * @return array|mixed
+     */
+    public function getSyncHistoryAttribute($value)
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        return json_decode($value, TRUE);
     }
 
     /**
