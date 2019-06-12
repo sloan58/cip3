@@ -26,6 +26,8 @@ Here's some of the packages included:
 
 [Vessel](https://vessel.shippingdocker.com/) - a Docker dev environment for Laravel
 
+[Webex Teams Integration](https://developer.webex.com/) - send Ucm sync event notifications to Webex Teams
+
 Vessel is a wrapper around Docker and docker-compose that makes it really easy to get setup with a full stack docker environment with just a couple commands.
 The Vessel package and a lot of awesome training has been produced by Chris Fidao.  The training is **so** good, I really can't say enough.  He moves quickly through the topics so that you don't feel like you're wasting time, but not so fast that you can't keep up.
 
@@ -34,7 +36,6 @@ Here's some links that I highly recommend you check out if you're interested in 
 - [Servers for Hackers](https://serversforhackers.com/)
 - [Shipping Docker](https://serversforhackers.com/shipping-docker)
 - [Vessel](https://vessel.shippingdocker.com/)
-
 I created this project as an opportunity to get more familiar with the Docker workflow.  If you're interested in working on this project and helping to build in some other features, please check out the *Contributing* section below.  I'd love to work with you to help build some free tools!  Also, please send any suggestions if there's a feature you'd like to see.
 
 
