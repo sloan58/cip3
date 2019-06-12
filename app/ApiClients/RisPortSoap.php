@@ -140,7 +140,7 @@ class RisPortSoap extends SoapClient
             Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): Error was not a throttle response.  Exiting");
 
             $this->ucm->updateSyncHistory(
-                false,
+                'Failed',
                 Carbon::now()->timestamp,
                 $e->getCode(),
                 $e->getMessage()

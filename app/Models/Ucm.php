@@ -57,14 +57,15 @@ class Ucm extends Model
     {
         $history = (array) $this->sync_history;
         array_unshift($history, [
-            'sync_completed' => $sync_completed,
+            'status' => $sync_completed,
             'timestamp' => $timestamp,
             'error_code' => $errorCode,
             'error_message' => $errorMessage
         ]);
 
+        $history = array_slice($history, 0, 3);
+
         $this->sync_history = $history;
-        dump($history, $this->sync_history);
     }
 
     /*
@@ -166,8 +167,10 @@ class Ucm extends Model
      */
     public function setSyncAtAttribute($value)
     {
-        $this->attributes['sync_at'] = Carbon::createFromFormat(
-            'H:i:s', $value . ':00', $this->timezone
-        )->tz('UTC')->toTimeString();
+        if(count(explode(':', $value)) == 2) {
+            $this->attributes['sync_at'] = Carbon::createFromFormat(
+                'H:i:s', $value . ':00', $this->timezone
+            )->tz('UTC')->toTimeString();
+        }
     }
 }

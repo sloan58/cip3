@@ -205,7 +205,7 @@ class AxlSoap extends SoapClient
                 ]);
 
                 $this->ucm->updateSyncHistory(
-                    false,
+                    'Failed',
                     Carbon::now()->timestamp,
                     $e->getCode(),
                     $e->getMessage()

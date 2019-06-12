@@ -72,7 +72,7 @@ class SyncUcmJob implements ShouldQueue
         Log::info(
             "SyncUcmJob@handle ({$this->ucm->name}): Updating sync history"
         );
-        $this->ucm->updateSyncHistory(true, Carbon::now()->timestamp);
+        $this->ucm->updateSyncHistory('Completed', Carbon::now()->timestamp);
 
         $this->ucm->save();
     }
