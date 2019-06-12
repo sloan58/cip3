@@ -9,6 +9,8 @@ The current version offers the following:
 
 - Cisco UCM Server(s) CRUD interface
 - Sync Cisco UCM Phones/Devices and RisPort data daily and on-demand
+- Sync History
+- Sync success/fail notifications via Webex Teams BYOB (Bring Your Own Bot)
 - Display device information and real-time data (IP Address, Firmware, etc) 
 - Manage User accounts
 
@@ -22,14 +24,23 @@ Here's some of the packages included:
 
 [laravel-chartjs](https://github.com/fxcosta/laravel-chartjs) - build sweet looking charts in your Laravel controllers
 
-[Vessel](https://github.com/shipping-docker/vessel) - a Docker dev environment for Laravel
+[Vessel](https://vessel.shippingdocker.com/) - a Docker dev environment for Laravel
+
+Vessel is a wrapper around Docker and docker-compose that makes it really easy to get setup with a full stack docker environment with just a couple commands.
+The Vessel package and a lot of awesome training has been produced by Chris Fidao.  The training is **so** good, I really can't say enough.  He moves quickly through the topics so that you don't feel like you're wasting time, but not so fast that you can't keep up.
+
+Here's some links that I highly recommend you check out if you're interested in learning more about docker, DevOps, Laravel and server management
+
+- [Servers for Hackers](https://serversforhackers.com/)
+- [Shipping Docker](https://serversforhackers.com/shipping-docker)
+- [Vessel](https://vessel.shippingdocker.com/)
 
 I created this project as an opportunity to get more familiar with the Docker workflow.  If you're interested in working on this project and helping to build in some other features, please check out the *Contributing* section below.  I'd love to work with you to help build some free tools!  Also, please send any suggestions if there's a feature you'd like to see.
 
 
 ## Installation
 
-After installing, your app will be reachable on your host IP at the port specified in the `.env` file (port 8000 by default)
+Note - after installation your app will be reachable on your host IP or localhost at the port specified in the `.env` file (port 8000 by default)
 
 `http://<your_ip>:8000`
 
@@ -65,13 +76,14 @@ composer install
 php artisan key:generate
 php artisan migrate --seed
 ```
+Be sure to configure your `.env` file to match your local resource configurations!
 
 Windows:
 
 *TODO*
 
 ### Cisco UCM Setup
-Create and account with the following Roles so that it can use the AXL and RisPort API's:
+Create an account with the following Roles so that it can use the AXL and RisPort API's:
 
 - AXL
 - Standard CCM Server Monitoring
@@ -96,19 +108,26 @@ Below are some sample screenshots after syncing my lab system.
 #### UCM List
 ![image](https://user-images.githubusercontent.com/6303820/59216141-014b4000-8b89-11e9-9e9f-72ea60d524d1.png)
 
+#### Sync Details
+![image](https://user-images.githubusercontent.com/6303820/59388754-993c5b80-8d3a-11e9-8464-7d573ffe03f8.png)
+
+
 #### UCM Add/Edit
 ![image](https://user-images.githubusercontent.com/6303820/59216225-35266580-8b89-11e9-89d6-014ce270a37a.png)
 
 #### Phone/Device Details
 ![image](https://user-images.githubusercontent.com/6303820/59225219-25fde280-8b9e-11e9-936b-12e91ac0c444.png)
 
+#### Webex Teams Integration
+![image](https://user-images.githubusercontent.com/6303820/59388678-65f9cc80-8d3a-11e9-9f56-60a1f3d21084.png)
+
+![image](https://user-images.githubusercontent.com/6303820/59388708-78740600-8d3a-11e9-8b2a-3da2f6b992c1.png)
+
 
 ## Todo
 
 - Create some roles and permissions
 - Create a docker-compose file that pulls in the app, rather than the app pulling in Docker
-- Better exception handling.  Right now, AXL sync exceptions might go unnoticed.  I'd like to generate an email/notification to an admin with the details.
-- Email integration
 - LDAP integration - I've used the [adldap2 package](https://github.com/Adldap2/Adldap2) before, which works nicely.
 - Tests, for goodness' sake!
 
