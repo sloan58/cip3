@@ -2,15 +2,19 @@
 
 namespace App\Jobs;
 
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use SoapFault;
+use Carbon\Carbon;
 use App\Models\Ucm;
+use GuzzleHttp\Client;
 use App\ApiClients\AxlSoap;
 use Illuminate\Bus\Queueable;
+use GuzzleHttp\RequestOptions;
 use App\ApiClients\RisPortSoap;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -45,6 +49,7 @@ class SyncUcmJob implements ShouldQueue
      *
      * @return void
      * @throws SoapFault
+     * @throws GuzzleException
      */
     public function handle()
     {
@@ -75,5 +80,17 @@ class SyncUcmJob implements ShouldQueue
         $this->ucm->updateSyncHistory('Completed', Carbon::now()->timestamp);
 
         $this->ucm->save();
+
+        if(setting('teams_enable_notifications')) {
+
+            Log::info(
+                "SyncUcmJob@handle ({$this->ucm->name}): Webex Teams notifications enabled.  Sending success 
+                message now."
+            );
+
+            $message = "{$this->ucm->name} just finished syncing **successfully!**";
+
+            $this->ucm->sendWebexTeamsNotification($message);
+        }
     }
 }

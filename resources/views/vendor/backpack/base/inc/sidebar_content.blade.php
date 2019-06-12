@@ -4,3 +4,4 @@
 <li><a href='{{ backpack_url('ucm') }}'><i class='fa fa-server'></i> <span>UCMs</span></a></li>
 <li><a href='{{ backpack_url('phone') }}'><i class='fa fa-phone'></i> <span>Phones</span></a></li>
 <li><a href="{{ backpack_url('user') }}"><i class="fa fa-user"></i> <span>Users</span></a></li>
+<li><a href="{{ backpack_url('settings') }}"><i class="fa fa-gears"></i> <span>Settings</span></a></li>

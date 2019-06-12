@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Models\Ucm;
 use App\Models\Phone;
 use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Exception\GuzzleException;
 
 class RisPortSoap extends SoapClient
 {
@@ -85,6 +86,7 @@ class RisPortSoap extends SoapClient
      * @param $phones
      * @return bool|Exception|SoapFault
      * @throws SoapFault
+     * @throws GuzzleException
      */
     private function queryRisPort($phones)
     {
@@ -147,6 +149,21 @@ class RisPortSoap extends SoapClient
             );
             $this->ucm->sync_in_progress = false;
             $this->ucm->save();
+
+            if(setting('teams_enable_notifications')) {
+
+                Log::info(
+                    "RisPortSoap@queryRisPort ({$this->ucm->name}): Webex Teams notifications enabled.  
+                             Sending error message now."
+                );
+
+                $message = "{$this->ucm->name} just finished syncing with **errors**:\n\n" .
+                    "> Error Code: {$e->getCode()}\n\n" .
+                    "> Error Message: {$e->getMessage()}";
+
+                $this->ucm->sendWebexTeamsNotification($message);
+            }
+
             exit(1);
         }
     }

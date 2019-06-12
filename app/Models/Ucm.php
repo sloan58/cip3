@@ -3,9 +3,14 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Backpack\CRUD\CrudTrait;
+use GuzzleHttp\RequestOptions;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Model;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ucm extends Model
@@ -66,6 +71,35 @@ class Ucm extends Model
         $history = array_slice($history, 0, 3);
 
         $this->sync_history = $history;
+    }
+
+    /**
+     * Send a message to Webex Teams
+     *
+     * @param $message
+     * @throws GuzzleException
+     */
+    public function sendWebexTeamsNotification($message)
+    {
+        $client = new Client();
+
+        try {
+            $client->request('POST', 'https://api.ciscospark.com/v1/messages', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . setting('teams_token'),
+                ],
+                'verify' => false,
+                RequestOptions::JSON => [
+                    'toPersonEmail' => setting('teams_to_address'),
+                    'markdown' => $message
+                ]
+            ]);
+        } catch (RequestException $e) {
+            Log::error("Ucm@sendWebexTeamsNotification ({$this->name}): Error sending Webex Teams notification- ", [
+                $e->getMessage()
+            ]);
+        }
+
     }
 
     /*
