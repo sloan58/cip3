@@ -14,5 +14,7 @@ Route::group([
     Route::get('/dashboard', 'DashboardController@index');
     Route::get('ucm/{ucm}/sync', 'UcmCrudController@sync');
     CRUD::resource('ucm', 'UcmCrudController');
-    CRUD::resource('phone', 'PhoneCrudController');
+    CRUD::resource('phone', 'PhoneCrudController')->with(function() {
+        Route::get('/phone/export', 'PhoneCrudController@export');
+    });
 }); // this should be the absolute last line of this file

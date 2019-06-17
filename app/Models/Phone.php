@@ -28,6 +28,21 @@ class Phone extends Model
     |--------------------------------------------------------------------------
     */
 
+    public function exportPhones($crud = false)
+    {
+        $now = \Carbon\Carbon::now()->timestamp;
+        $fileName = "cip3_phone_export_{$now}.csv";
+
+//        return '<a href="/admin/phone/export" class="btn btn-primary ladda-button" data-style="zoom-in"><span class="ladda-label"><i class="fa fa-clipboard"></i> Export</span></a>';
+        return '<a href="/admin/phone/export" class="btn btn-primary ladda-button" data-style="zoom-in" download="' . $fileName . '">
+                    <span class="ladda-label">
+                        <i class="fa fa-clipboard"></i>
+                        Export All
+                    </span>
+                </a>';
+
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
