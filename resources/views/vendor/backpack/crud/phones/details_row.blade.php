@@ -3,6 +3,7 @@
         <div class="col-md-12">
             @if($entry->realtime_data[0]['Status'])
             <ul>
+                <li><b>UCM Node:</b> {{ $entry->realtime_data[0]['UcmNode'] }}</li>
                 <li><b>Status:</b> {{ $entry->realtime_data[0]['Status'] }}</li>
                 @if($entry->realtime_data[0]['Status'] !== "Registered")
                     <li><b>Reason:</b> {{ $entry->realtime_data[0]['StatusReason'] }}</li>

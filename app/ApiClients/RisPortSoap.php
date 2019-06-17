@@ -117,7 +117,10 @@ class RisPortSoap extends SoapClient
             }
 
             Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): Device data is available.");
-            $realtimeData = $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item->CmDevices->item;
+            $realtimeData = is_array($response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item) ?
+                            $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item :
+                            [$response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item];
+//            $realtimeData = $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item->CmDevices->item;
             $this->storeRealtimeData($realtimeData);
             return true;
 
@@ -176,62 +179,65 @@ class RisPortSoap extends SoapClient
     private function storeRealtimeData($realtimeData)
     {
         Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing Realtime Data locally");
-        foreach($realtimeData as $data) {
+        foreach($realtimeData as $cmNode) {
+            if(!$cmNode->CmDevices) continue;
+            foreach($cmNode->CmDevices->item as $data) {
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Processing item", [ $data ]);
 
-            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Processing item", [ $data ]);
-
-            $phone = Phone::where([
-                'name' => $data->Name,
-                'ucm_id' => $this->ucm->id
-            ])->first();
-            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Updating IP Phone ", [
-                'phoneId' => $phone->id
-            ]);
-
-            $lines = array_map(function($line) {
-                return $line->DirectoryNumber;
-            }, is_array($data->LinesStatus->item) ? $data->LinesStatus->item : [$data->LinesStatus->item]);
-
-            $currentStatus = [
-                'Status' => $data->Status,
-                'StatusReason' => $data->StatusReason,
-                'Protocol' => $data->Protocol,
-                'NumOfLines' => $data->NumOfLines,
-                'Lines' => $lines,
-                'ActiveLoadID' => $data->ActiveLoadID,
-                'InactiveLoadID' => $data->InactiveLoadID,
-                'DownloadStatus' => $data->DownloadStatus,
-                'DownloadFailureReason' => $data->DownloadFailureReason,
-                'IPAddress' => $data->IPAddress->item->IP,
-                'UCMTimestamp' => $data->TimeStamp,
-                'CIP3Timestamp' => Carbon::now()->timestamp
-            ];
-
-            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Setting current status ", [
-                'currentStatus' => $currentStatus
-            ]);
-
-            if($phone->realtime_data) {
-                $statuses = $phone->realtime_data;
-                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Adding new status to DB ", [
-                    'statuses_before' => $statuses,
-
+                $phone = Phone::where([
+                    'name' => $data->Name,
+                    'ucm_id' => $this->ucm->id
+                ])->first();
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Updating IP Phone ", [
+                    'phoneId' => $phone->id
                 ]);
-                array_unshift($statuses, $currentStatus);
-                $phone->realtime_data = $statuses;
-                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Adding new status to DB ", [
-                    'statuses_after' => $statuses,
 
+                $lines = array_map(function($line) {
+                    return $line->DirectoryNumber;
+                }, is_array($data->LinesStatus->item) ? $data->LinesStatus->item : [$data->LinesStatus->item]);
+
+                $currentStatus = [
+                    'UcmNode' => $cmNode->Name,
+                    'Status' => $data->Status,
+                    'StatusReason' => $data->StatusReason,
+                    'Protocol' => $data->Protocol,
+                    'NumOfLines' => $data->NumOfLines,
+                    'Lines' => $lines,
+                    'ActiveLoadID' => $data->ActiveLoadID,
+                    'InactiveLoadID' => $data->InactiveLoadID,
+                    'DownloadStatus' => $data->DownloadStatus,
+                    'DownloadFailureReason' => $data->DownloadFailureReason,
+                    'IPAddress' => $data->IPAddress->item->IP,
+                    'UCMTimestamp' => $data->TimeStamp,
+                    'CIP3Timestamp' => Carbon::now()->timestamp
+                ];
+
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Setting current status ", [
+                    'currentStatus' => $currentStatus
                 ]);
-            } else {
-                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): DB status is empty.  " .
-                                   "Adding current status"
-                );
-                $phone->realtime_data = [$currentStatus];
+
+                if($phone->realtime_data) {
+                    $statuses = $phone->realtime_data;
+                    Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Adding new status to DB ", [
+                        'statuses_before' => $statuses,
+
+                    ]);
+                    array_unshift($statuses, $currentStatus);
+                    $phone->realtime_data = $statuses;
+                    Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Adding new status to DB ", [
+                        'statuses_after' => $statuses,
+
+                    ]);
+                } else {
+                    Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): DB status is empty.  " .
+                        "Adding current status"
+                    );
+                    $phone->realtime_data = [$currentStatus];
+                }
+
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing phone data");
+                $phone->save();
             }
-
-            Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing phone data");
-            $phone->save();
         }
         Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing Realtime Data complete");
     }
