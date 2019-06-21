@@ -180,9 +180,20 @@ class RisPortSoap extends SoapClient
     {
         Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing Realtime Data locally");
         foreach($realtimeData as $cmNode) {
-            if(!$cmNode->CmDevices) continue;
-            foreach($cmNode->CmDevices->item as $data) {
+
+            if(!$cmNode->CmDevices) {
+                Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): $cmNode->Name has no registered devices");
+                continue;
+            }
+
+            Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): $cmNode->Name does have registered devices.  Setting device iterator");
+            $devices = is_array($cmNode->CmDevices->item) ? $cmNode->CmDevices->item : [$cmNode->CmDevices->item];
+
+            Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Iterating devices");
+            foreach($devices as $data) {
                 Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Processing item", [ $data ]);
+
+                if(!isset($data->Name)) continue;
 
                 $phone = Phone::where([
                     'name' => $data->Name,
