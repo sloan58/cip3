@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-md-12">
             @if(isset($noData))
-            <div class="panel panel-default">
+            <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title">UCM Phone Statistics</h3>
                 </div>
@@ -20,7 +20,7 @@
                 </div>
             </div>
             @else
-            <div class="panel panel-default">
+            <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title">UCM Phone Statistics</h3>
                 </div>
@@ -33,6 +33,27 @@
                     </div>
                 </div>
             </div>
+            @endif
+        </div>
+        <div class="col-md-12">
+            @if(isset($noData))
+            @else
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">UCM Phone Registration</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-md-4">
+                            {!! $regCounts->render() !!}
+                        </div>
+                        <div class="col-md-4">
+                            {!! $unRegCounts->render() !!}
+                        </div>
+                        <div class="col-md-4">
+                            {!! $unKnownCounts->render() !!}
+                        </div>
+                    </div>
+                </div>
             @endif
         </div>
     </div>

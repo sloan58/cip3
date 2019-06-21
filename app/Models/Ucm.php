@@ -162,6 +162,36 @@ class Ucm extends Model
         return $this->phones()->count();
     }
 
+    /**
+     * Return the total registered phone count for this Ucm
+     *
+     * @return mixed
+     */
+    public function getRegisteredPhoneCountAttribute()
+    {
+        return $this->phones()->where('status', 'registered')->count();
+    }
+
+    /**
+     * Return the total unregistered phone count for this Ucm
+     *
+     * @return mixed
+     */
+    public function getUnRegisteredPhoneCountAttribute()
+    {
+        return $this->phones()->where('status', 'unregistered')->count();
+    }
+
+    /**
+     * Return the total unknown phone count for this Ucm
+     *
+     * @return mixed
+     */
+    public function getUnKnownPhoneCountAttribute()
+    {
+        return $this->phones()->where('status', 'unknown')->count();
+    }
+
 
     /*
     |--------------------------------------------------------------------------

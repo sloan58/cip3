@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head>
-    @include('backpack::inc.head')
+{{--    @include('backpack::inc.head')--}}
+    @include('inc.head')
 </head>
 <body class="hold-transition {{ config('backpack.base.skin') }} sidebar-mini">
 <script type="text/javascript">

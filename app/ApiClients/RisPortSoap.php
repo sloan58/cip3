@@ -247,6 +247,7 @@ class RisPortSoap extends SoapClient
                 }
 
                 Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing phone data");
+                $phone->status = $currentStatus['Status'];
                 $phone->save();
             }
         }

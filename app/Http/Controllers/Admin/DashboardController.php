@@ -30,7 +30,19 @@ class DashboardController extends Controller
 
         $clusterCounts = $this->buildTotalPhoneCountChart();
 
-        return view('dashboard', compact('phoneModels', 'clusterCounts'));
+        $regCounts = $this->buildRegisteredPhoneCountChart();
+
+        $unRegCounts = $this->buildUnRegisteredPhoneCountChart();
+
+        $unKnownCounts = $this->buildUnKnownPhoneCountChart();
+
+        return view('dashboard', compact(
+            'phoneModels',
+            'clusterCounts',
+            'regCounts',
+            'unRegCounts',
+            'unKnownCounts'
+        ));
     }
 
     /**
@@ -121,5 +133,119 @@ class DashboardController extends Controller
             ]);
 
         return $clusterCounts;
+    }
+
+    /**
+     * Create the Dashboard total phones chart
+     *
+     * @return mixed
+     */
+    private function buildRegisteredPhoneCountChart()
+    {
+        Log::info("DashboardController@buildTotalPhoneCountChart: Fetching data for registered Phone counts");
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Gathering all UCM records and counts");
+        $data = Ucm::all()->pluck('registeredPhoneCount', 'name')->toArray();
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
+        $regCounts = app()->chartjs
+            ->name('regCounts')
+            ->type('bar')
+            ->size(['width' => 400, 'height' => 200])
+            ->labels(array_keys($data))
+            ->datasets([
+                [
+                    'backgroundColor' => RandomColor::many(count($data)),
+                    'hoverBackgroundColor' => ['#FF6384', '#36A2EB'],
+                    'data' => array_values($data)
+                ]
+            ])
+            ->options([
+                'legend' => [
+                    'display' => false
+                ],
+                'title' => [
+                    'display' => true,
+                    'text' => 'Registered Phones'
+                ]
+            ]);
+
+        return $regCounts;
+    }
+
+    /**
+     * Create the Dashboard total phones chart
+     *
+     * @return mixed
+     */
+    private function buildUnRegisteredPhoneCountChart()
+    {
+        Log::info("DashboardController@buildTotalPhoneCountChart: Fetching data for registered Phone counts");
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Gathering all UCM records and counts");
+        $data = Ucm::all()->pluck('unRegisteredPhoneCount', 'name')->toArray();
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
+        $regCounts = app()->chartjs
+            ->name('unRegCounts')
+            ->type('bar')
+            ->size(['width' => 400, 'height' => 200])
+            ->labels(array_keys($data))
+            ->datasets([
+                [
+                    'backgroundColor' => RandomColor::many(count($data)),
+                    'hoverBackgroundColor' => ['#FF6384', '#36A2EB'],
+                    'data' => array_values($data)
+                ]
+            ])
+            ->options([
+                'legend' => [
+                    'display' => false
+                ],
+                'title' => [
+                    'display' => true,
+                    'text' => 'UnRegistered Phones'
+                ]
+            ]);
+
+        return $regCounts;
+    }
+
+    /**
+     * Create the Dashboard total phones chart
+     *
+     * @return mixed
+     */
+    private function buildUnKnownPhoneCountChart()
+    {
+        Log::info("DashboardController@buildTotalPhoneCountChart: Fetching data for registered Phone counts");
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Gathering all UCM records and counts");
+        $data = Ucm::all()->pluck('unKnownPhoneCount', 'name')->toArray();
+
+        Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
+        $regCounts = app()->chartjs
+            ->name('unknownCounts')
+            ->type('bar')
+            ->size(['width' => 400, 'height' => 200])
+            ->labels(array_keys($data))
+            ->datasets([
+                [
+                    'backgroundColor' => RandomColor::many(count($data)),
+                    'hoverBackgroundColor' => ['#FF6384', '#36A2EB'],
+                    'data' => array_values($data)
+                ]
+            ])
+            ->options([
+                'legend' => [
+                    'display' => false
+                ],
+                'title' => [
+                    'display' => true,
+                    'text' => 'UnKnown Phones'
+                ]
+            ]);
+
+        return $regCounts;
     }
 }

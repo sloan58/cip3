@@ -49,6 +49,11 @@ class PhoneCrudController extends CrudController
                 'label' => 'Description',
             ],
             [
+                'name' => 'status',
+                'type' => 'text',
+                'label' => 'Status',
+            ],
+            [
                 'name' => 'model',
                 'type' => 'text',
                 'label' => 'Model',
