@@ -19,7 +19,13 @@ class CreatePhonesTable extends Migration
             $table->string('description')->nullable();
             $table->string('model');
             $table->string('device_pool');
-            $table->enum('status', ['Registered', 'PartiallyRegistered', 'UnRegistered', 'Unknown'])->default('Unknown');
+            $table->enum('status', [
+                'Registered',
+                'PartiallyRegistered',
+                'UnRegistered',
+                'Rejected',
+                'Unknown'
+            ])->default('Unknown');
             $table->json('realtime_data')->nullable();
             $table->unsignedBigInteger('ucm_id')->index();
             $table->foreign('ucm_id')

@@ -225,7 +225,7 @@ class RisPortSoap extends SoapClient
                     'InactiveLoadID' => $data->InactiveLoadID,
                     'DownloadStatus' => $data->DownloadStatus,
                     'DownloadFailureReason' => $data->DownloadFailureReason,
-                    'IPAddress' => $data->IPAddress->item->IP,
+                    'IPAddress' => $data->IPAddress->item->IP ?? '',
                     'UCMTimestamp' => $data->TimeStamp,
                     'CIP3Timestamp' => Carbon::now()->timestamp
                 ];
