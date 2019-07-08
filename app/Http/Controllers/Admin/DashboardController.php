@@ -90,7 +90,7 @@ class DashboardController extends Controller
                 ],
                 'title' => [
                     'display' => true,
-                    'text' => 'Phone Counts by UCM'
+                    'text' => 'Phone Counts for all Clusters'
                 ]
             ]);
 

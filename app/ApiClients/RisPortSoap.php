@@ -74,8 +74,14 @@ class RisPortSoap extends SoapClient
             count($this->phones)
         ]);
 
+        $totalIterations = floor(count($this->phones) / 1000);
+        Log::info("RisPortSoap@setRisPhoneArray ({$this->ucm->name}): Total iterations is $totalIterations");
+
         Log::info("RisPortSoap@setRisPhoneArray ({$this->ucm->name}): Calling RisPort API in 1k chunks");
-        foreach(array_chunk($this->phones, 1000) as $chunk) {
+        foreach(array_chunk($this->phones, 1000) as $loop => $chunk) {
+            Log::info(
+                "RisPortSoap@setRisPhoneArray ({$this->ucm->name}): Processing loop " . ($loop + 1) . " of $totalIterations"
+            );
             $this->queryRisPort($chunk);
         }
     }
@@ -120,7 +126,6 @@ class RisPortSoap extends SoapClient
             $realtimeData = is_array($response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item) ?
                             $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item :
                             [$response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item];
-//            $realtimeData = $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item->CmDevices->item;
             $this->storeRealtimeData($realtimeData);
             return true;
 
@@ -203,9 +208,11 @@ class RisPortSoap extends SoapClient
                     'phoneId' => $phone->id
                 ]);
 
-                $lines = array_map(function($line) {
-                    return $line->DirectoryNumber;
-                }, is_array($data->LinesStatus->item) ? $data->LinesStatus->item : [$data->LinesStatus->item]);
+                if(isset($data->LinesStatus->item)) {
+                    $lines = array_map(function($line) {
+                        return $line->DirectoryNumber;
+                    }, is_array($data->LinesStatus->item) ? $data->LinesStatus->item : [$data->LinesStatus->item]);
+                }
 
                 $currentStatus = [
                     'UcmNode' => $cmNode->Name,

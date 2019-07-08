@@ -61,6 +61,8 @@ class AxlSoap extends SoapClient
         
         $wsdl = storage_path('wsdl/axl/') . $this->ucm->version . '/AXLAPI.wsdl';
 
+        $this->skip = 0;
+
         parent::__construct($wsdl,
             [
                 'trace' => true,
@@ -111,39 +113,38 @@ class AxlSoap extends SoapClient
      */
     public function syncPhones()
     {
-        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
+Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
 
-        $returnedTags = [
+        $listPhoneObject = [
+            'searchCriteria' => [
+                'name' => '%'
+            ],
+            'returnedTags' => [
                 'name' => '',
                 'description' => '',
                 'model' => '',
                 'devicePoolName' => ''
+            ]
         ];
-        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set listPhone returnedTags ", [ $returnedTags ]);
+        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set listPhoneObject ", [ $listPhoneObject ]);
 
         Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Checking for throttle scenario", [
             'throttle' => $this->chunk
         ]);
         if ($this->chunk) {
-            $returnedTags['skip'] = $this->skip;
-            $returnedTags['first'] = $this->suggestedRows;
+            $listPhoneObject['skip'] = $this->skip;
+            $listPhoneObject['first'] = $this->suggestedRows;
             Log::info("AxlSoap@syncPhones ({$this->ucm->name}): We are currently throttling.  " .
-                "Setting skip and first parameters for listPhone", [
+                "Setting 'skip' and 'first' parameters for listPhone", [
                     'skip' => $this->skip,
                     'first' => $this->suggestedRows
             ]);
+            Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Updated listPhoneObject ", [ $listPhoneObject ]);
         }
 
         Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Calling listPhone API");
         try {
-            $res = $this->listPhone([
-                    'searchCriteria' => [
-                        'name' => '%'
-                    ],
-                    'returnedTags' => $returnedTags
-                ]
-            );
-
+            $res = $this->listPhone($listPhoneObject);
             Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Received good listPhone response");
             if (isset($res->return->phone)) {
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Response has interesting data");
@@ -163,6 +164,12 @@ class AxlSoap extends SoapClient
             if (preg_match('/Query request too large/', $e->faultstring)) {
 
                 Log::error("AxlSoap@syncPhones ({$this->ucm->name}): Received throttle notification from AXL");
+                Log::debug("AxlSoap@syncPhones ({$this->ucm->name}): Last AXL Request", [
+                    $this->__getLastRequest()
+                ]);
+                Log::debug("AxlSoap@syncPhones ({$this->ucm->name}): Last AXL Response", [
+                    $this->__getLastResponse()
+                ]);
 
                 preg_match_all('/[0-9]+/', $e->faultstring, $matches);
                 $this->totalRows = $matches[0][0];
