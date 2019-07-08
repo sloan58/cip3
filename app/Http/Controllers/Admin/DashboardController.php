@@ -122,15 +122,23 @@ class DashboardController extends Controller
                     'data' => array_values($data)
                 ]
             ])
-            ->options([
-                'legend' => [
-                    'display' => false
-                ],
-                'title' => [
-                    'display' => true,
-                    'text' => 'Totals'
-                ]
-            ]);
+            ->optionsRaw("{
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Totals'
+                },
+                scales: {
+                    yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                            }
+                        }]
+                }
+            }");
 
         return $clusterCounts;
     }
@@ -145,7 +153,12 @@ class DashboardController extends Controller
         Log::info("DashboardController@buildTotalPhoneCountChart: Fetching data for registered Phone counts");
 
         Log::info("DashboardController@buildTotalPhoneCountChart: Gathering all UCM records and counts");
-        $data = Ucm::all()->pluck('registeredPhoneCount', 'name')->toArray();
+        $data = Ucm::all()
+                    ->sortByDesc('registeredPhoneCount')
+                    ->pluck('registeredPhoneCount', 'name')
+                    ->toArray();
+
+        $maxValue = reset($data);
 
         Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
         $regCounts = app()->chartjs
@@ -160,15 +173,23 @@ class DashboardController extends Controller
                     'data' => array_values($data)
                 ]
             ])
-            ->options([
-                'legend' => [
-                    'display' => false
-                ],
-                'title' => [
-                    'display' => true,
-                    'text' => 'Registered Phones'
-                ]
-            ]);
+            ->optionsRaw("{
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Registered Phones'
+                },
+                scales: {
+                    yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                            }
+                        }]
+                }
+            }");
 
         return $regCounts;
     }
@@ -183,7 +204,12 @@ class DashboardController extends Controller
         Log::info("DashboardController@buildTotalPhoneCountChart: Fetching data for registered Phone counts");
 
         Log::info("DashboardController@buildTotalPhoneCountChart: Gathering all UCM records and counts");
-        $data = Ucm::all()->pluck('unRegisteredPhoneCount', 'name')->toArray();
+        $data = Ucm::all()
+            ->sortByDesc('unRegisteredPhoneCount')
+            ->pluck('unRegisteredPhoneCount', 'name')
+            ->toArray();
+
+        $maxValue = reset($data);
 
         Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
         $regCounts = app()->chartjs
@@ -198,15 +224,23 @@ class DashboardController extends Controller
                     'data' => array_values($data)
                 ]
             ])
-            ->options([
-                'legend' => [
-                    'display' => false
-                ],
-                'title' => [
-                    'display' => true,
-                    'text' => 'UnRegistered Phones'
-                ]
-            ]);
+            ->optionsRaw("{
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'UnRegistered Phones'
+                },
+                scales: {
+                    yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                            }
+                        }]
+                }
+            }");
 
         return $regCounts;
     }
@@ -221,7 +255,12 @@ class DashboardController extends Controller
         Log::info("DashboardController@buildTotalPhoneCountChart: Fetching data for registered Phone counts");
 
         Log::info("DashboardController@buildTotalPhoneCountChart: Gathering all UCM records and counts");
-        $data = Ucm::all()->pluck('unKnownPhoneCount', 'name')->toArray();
+        $data = Ucm::all()
+            ->sortByDesc('unKnownPhoneCount')
+            ->pluck('unKnownPhoneCount', 'name')
+            ->toArray();
+
+//        $maxValue = reset($data);
 
         Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
         $regCounts = app()->chartjs
@@ -236,15 +275,23 @@ class DashboardController extends Controller
                     'data' => array_values($data)
                 ]
             ])
-            ->options([
-                'legend' => [
-                    'display' => false
-                ],
-                'title' => [
-                    'display' => true,
-                    'text' => 'UnKnown Phones'
-                ]
-            ]);
+            ->optionsRaw("{
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'UnKnown Phones'
+                },
+                scales: {
+                    yAxes: [{
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                            }
+                        }]
+                }
+            }");
 
         return $regCounts;
     }
