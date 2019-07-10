@@ -158,8 +158,6 @@ class DashboardController extends Controller
                     ->pluck('registeredPhoneCount', 'name')
                     ->toArray();
 
-        $maxValue = reset($data);
-
         Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
         $regCounts = app()->chartjs
             ->name('regCounts')
@@ -209,8 +207,6 @@ class DashboardController extends Controller
             ->pluck('unRegisteredPhoneCount', 'name')
             ->toArray();
 
-        $maxValue = reset($data);
-
         Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
         $regCounts = app()->chartjs
             ->name('unRegCounts')
@@ -259,8 +255,6 @@ class DashboardController extends Controller
             ->sortByDesc('unKnownPhoneCount')
             ->pluck('unKnownPhoneCount', 'name')
             ->toArray();
-
-//        $maxValue = reset($data);
 
         Log::info("DashboardController@buildTotalPhoneCountChart: Creating ChartJS clusterCounts Chart");
         $regCounts = app()->chartjs

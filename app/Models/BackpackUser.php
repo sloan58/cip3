@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Backpack\Base\app\Models\Traits\InheritsRelationsFromParentModel;
 use Backpack\Base\app\Notifications\ResetPasswordNotification as ResetPasswordNotification;
 
@@ -32,5 +33,15 @@ class BackpackUser extends User
     public function getEmailForPasswordReset()
     {
         return $this->email;
+    }
+
+    /**
+     * A User Has Many Reports
+     *
+     * @return HasMany
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'submitted_by', 'email');
     }
 }

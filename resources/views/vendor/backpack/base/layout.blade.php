@@ -27,11 +27,14 @@
 
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
+
         <!-- Content Header (Page header) -->
     @yield('header')
 
     <!-- Main content -->
         <section class="content">
+
+            @include('modals.modal', ['ucms' => \App\Models\Ucm::select('name')->get()])
 
             @yield('content')
 

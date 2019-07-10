@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('vendor.backpack.base.layout')
 
 @section('header')
     <section class="content-header">
