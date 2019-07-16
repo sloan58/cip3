@@ -37,7 +37,6 @@ class UcmCrudController extends CrudController
 
         // Custom Buttons
         $this->crud->addButtonFromView('line', 'sync', 'ucm_sync', 'beginning');
-//        $this->crud->addButtonFromView('line', 'realtime', 'ucm_update_realtime_info', 'beginning');
 
         /*
         |--------------------------------------------------------------------------
