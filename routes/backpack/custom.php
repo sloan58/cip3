@@ -13,6 +13,7 @@ Route::group([
 ], function () { // custom admin routes
     Route::get('/dashboard', 'DashboardController@index');
     Route::get('ucm/{ucm}/sync', 'UcmCrudController@sync');
+    Route::get('ucm/{ucm}/update-realtime', 'UcmCrudController@updateRealtime');
     CRUD::resource('ucm', 'UcmCrudController');
     CRUD::resource('phone', 'PhoneCrudController')->with(function() {
         Route::get('/phone/export', 'PhoneCrudController@export');

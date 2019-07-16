@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Jobs\SyncUcmJob;
+use App\Jobs\UpdateRealtimeDataJob;
 use SoapFault;
 use App\Models\Ucm;
 use App\ApiClients\AxlSoap;
@@ -36,6 +37,7 @@ class UcmCrudController extends CrudController
 
         // Custom Buttons
         $this->crud->addButtonFromView('line', 'sync', 'ucm_sync', 'beginning');
+//        $this->crud->addButtonFromView('line', 'realtime', 'ucm_update_realtime_info', 'beginning');
 
         /*
         |--------------------------------------------------------------------------
@@ -189,6 +191,19 @@ class UcmCrudController extends CrudController
 
         SyncUcmJob::dispatch($ucm);
         Alert::success("UCM Sync Initiated for UCM {$ucm->name}!")->flash();
+        return back();
+    }
+
+    /**
+     * Sync a UCM Server on-demand
+     *
+     * @param Ucm $ucm
+     * @return RedirectResponse
+     */
+    public function updateRealtime(Ucm $ucm)
+    {
+        UpdateRealtimeDataJob::dispatch($ucm);
+        Alert::success("UCM Realtime Sync Initiated for UCM {$ucm->name}!")->flash();
         return back();
     }
 }
