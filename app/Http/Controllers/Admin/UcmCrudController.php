@@ -201,6 +201,9 @@ class UcmCrudController extends CrudController
      */
     public function updateRealtime(Ucm $ucm)
     {
+        $ucm->sync_in_progress = true;
+        $ucm->save();
+
         UpdateRealtimeDataJob::dispatch($ucm);
         Alert::success("UCM Realtime Sync Initiated for UCM {$ucm->name}!")->flash();
         return back();
