@@ -50,6 +50,14 @@ class Phone extends Model
         return $this->belongsTo(Ucm::class);
     }
 
+    /**
+     * @return BelongsTo
+     */
+    public function itl()
+    {
+        return $this->belongsTo(Itl::class, 'model', 'model');
+    }
+
     /*
     |--------------------------------------------------------------------------
     | SCOPES

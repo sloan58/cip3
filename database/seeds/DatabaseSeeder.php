@@ -31,5 +31,9 @@ class DatabaseSeeder extends Seeder
             'sync_schedule_enabled' => true,
             'sync_in_progress' => false
         ]);
+
+        $this->call([
+            ItlsSeeder::class
+        ]);
     }
 }

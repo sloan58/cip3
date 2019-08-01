@@ -20,7 +20,7 @@ class AxlSoap extends SoapClient
      * @var bool
      */
     private $chunk;
-    
+
     /**
      * @var float
      */
@@ -30,22 +30,22 @@ class AxlSoap extends SoapClient
      * @var float
      */
     private $suggestedRows;
-    
+
     /**
      * @var float|int
      */
     private $iterations;
-    
+
     /**
      * @var int
      */
     private $skip;
-    
+
     /**
      * @var int
      */
     private $loop;
-    
+
     /**
      * @var Ucm
      */
@@ -58,7 +58,7 @@ class AxlSoap extends SoapClient
     public function __construct(Ucm $ucm)
     {
         $this->ucm = $ucm;
-        
+
         $wsdl = storage_path('wsdl/axl/') . $this->ucm->version . '/AXLAPI.wsdl';
 
         $this->skip = 0;
@@ -113,7 +113,7 @@ class AxlSoap extends SoapClient
      */
     public function syncPhones()
     {
-Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
+        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
 
         $listPhoneObject = [
             'searchCriteria' => [
@@ -136,8 +136,8 @@ Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
             $listPhoneObject['first'] = $this->suggestedRows;
             Log::info("AxlSoap@syncPhones ({$this->ucm->name}): We are currently throttling.  " .
                 "Setting 'skip' and 'first' parameters for listPhone", [
-                    'skip' => $this->skip,
-                    'first' => $this->suggestedRows
+                'skip' => $this->skip,
+                'first' => $this->suggestedRows
             ]);
             Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Updated listPhoneObject ", [ $listPhoneObject ]);
         }
@@ -181,7 +181,7 @@ Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
                 $this->suggestedRows = floor($matches[0][1] / 10);
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Suggested rows is {$matches[0][1]}");
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set limit to $this->suggestedRows (1/10th) " .
-                                  "to avoid a recursive throttle."
+                    "to avoid a recursive throttle."
                 );
 
                 $this->iterations =  floor($this->totalRows / $this->suggestedRows) +1;
@@ -190,12 +190,12 @@ Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Skip set to $this->skip");
                 for ($this->loop = 1; $this->loop <= $this->iterations; $this->loop++) {
                     Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Querying AXL listPhones.  " .
-                                      "Iteration is $this->loop out of $this->iterations"
+                        "Iteration is $this->loop out of $this->iterations"
                     );
                     $this->syncPhones();
                     $this->skip = $this->skip + $this->suggestedRows;
                     Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Processed throttle iteration.  " .
-                                      "Setting skip to $this->skip"
+                        "Setting skip to $this->skip"
                     );
                 }
                 $this->resetThrottle();
@@ -208,7 +208,7 @@ Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Running syncPhones");
                 ]);
 
                 Log::error("AxlSoap@syncPhones ({$this->ucm->name}): AXL SOAP Exception thrown.  " .
-                                   "Tearing down sync process.", [
+                    "Tearing down sync process.", [
                     'fault code' => $e->getCode(),
                     'fault message' => $e->getMessage()
                 ]);
