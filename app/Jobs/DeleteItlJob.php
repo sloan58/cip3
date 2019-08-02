@@ -33,13 +33,20 @@ class DeleteItlJob implements ShouldQueue
     private $phone;
 
     /**
+     * The User email requesting the process
+     */
+    private $requestedBy;
+
+    /**
      * Create a new job instance.
      *
      * @param Phone $phone
+     * @param $requestedBy
      */
-    public function __construct(Phone $phone)
+    public function __construct(Phone $phone, $requestedBy)
     {
         $this->phone = $phone;
+        $this->requestedBy = $requestedBy;
     }
 
     /**
@@ -59,6 +66,7 @@ class DeleteItlJob implements ShouldQueue
         Log::info('DeleteItlJob@handle: Creating Eraser object');
         $eraser = new Eraser;
         $eraser->phone = $this->phone->name;
+        $eraser->requested_by = $this->requestedBy;
 
         Log::info('DeleteItlJob@handle: Pulling latest realtime information for this phone');
         $ris = new RisPortSoap($this->phone->ucm, false);

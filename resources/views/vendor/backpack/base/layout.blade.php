@@ -34,7 +34,8 @@
     <!-- Main content -->
         <section class="content">
 
-            @include('modals.modal', ['ucms' => \App\Models\Ucm::select('name')->get()])
+            @include('modals.bulk-delete-itl')
+            @include('modals.export-phones', ['ucms' => \App\Models\Ucm::select('name')->get()])
 
             @yield('content')
 

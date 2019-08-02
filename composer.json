@@ -16,6 +16,7 @@
         "barryvdh/laravel-elfinder": "^0.4.2",
         "fideloper/proxy": "^4.0",
         "fx3costa/laravelchartjs": "^2.5",
+        "keboola/csv": "^2.0",
         "laravel/framework": "5.8.*",
         "laravel/telescope": "^2.0",
         "laravel/tinker": "^1.0",

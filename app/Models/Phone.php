@@ -43,6 +43,19 @@ class Phone extends Model
     }
 
     /**
+     * Custom UI Button to Bulk Delete ITL Files
+     *
+     * @param bool $crud
+     * @return string
+     */
+    public function bulkDeleteItl($crud = false)
+    {
+        return '<button type="button" class="btn btn-primary ladda-button" data-toggle="modal" data-target="#bulkDeleteItl"><i class="fa fa-bomb"></i>
+                        Bulk Delete ITL
+                </button>';
+    }
+
+    /**
      * Return the Phone's current IP Address
      *
      * @return mixed

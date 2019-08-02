@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "226f697a00061c00c5d8eb359f6ddc66",
+    "content-hash": "5066535891a5eb1114ed9c9ecceaa338",
     "packages": [
         {
             "name": "almasaeed2010/adminlte",
@@ -1538,6 +1538,52 @@
             ],
             "description": "Highlight PHP code in terminal",
             "time": "2018-09-29T18:48:56+00:00"
+        },
+        {
+            "name": "keboola/csv",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/keboola/php-csv.git",
+                "reference": "d46e83e973aeec11dbebe55deb6eb9c0f14cd271"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/keboola/php-csv/zipball/d46e83e973aeec11dbebe55deb6eb9c0f14cd271",
+                "reference": "d46e83e973aeec11dbebe55deb6eb9c0f14cd271",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "^0.4",
+                "phpunit/phpunit": "^5.7",
+                "squizlabs/php_codesniffer": "^3.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Keboola\\Csv\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Keboola",
+                    "email": "devel@keboola.com"
+                }
+            ],
+            "description": "Keboola CSV reader and writer",
+            "homepage": "http://keboola.com",
+            "keywords": [
+                "csv",
+                "rfc4180"
+            ],
+            "time": "2018-05-18T09:12:21+00:00"
         },
         {
             "name": "laravel/framework",

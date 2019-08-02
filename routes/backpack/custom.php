@@ -11,12 +11,22 @@ Route::group([
     'middleware' => ['web', config('backpack.base.middleware_key', 'admin')],
     'namespace'  => 'App\Http\Controllers\Admin',
 ], function () { // custom admin routes
+    // Dashboard
     Route::get('/dashboard', 'DashboardController@index');
+
+    // UCM Routes
     Route::get('ucm/{ucm}/sync', 'UcmCrudController@sync');
     Route::get('ucm/{ucm}/update-realtime', 'UcmCrudController@updateRealtime');
     CRUD::resource('ucm', 'UcmCrudController');
+
+    // Phone Routes
+    Route::get('/phone/{phone}/delete-itl', 'PhoneCrudController@deleteItl');
+    Route::post('bulk-itl', 'PhoneCrudController@bulkDeleteItl');
     CRUD::resource('phone', 'PhoneCrudController')->with(function() {
         Route::get('/phone/export', 'PhoneCrudController@export');
     });
+
+    // Report Routes
     CRUD::resource('report', 'ReportCrudController');
+
 }); // this should be the absolute last line of this file

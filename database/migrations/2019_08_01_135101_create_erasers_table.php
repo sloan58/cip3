@@ -15,6 +15,7 @@ class CreateErasersTable extends Migration
     {
         Schema::create('erasers', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('requested_by');
             $table->string('phone');
             $table->foreign('phone')
                     ->references('name')

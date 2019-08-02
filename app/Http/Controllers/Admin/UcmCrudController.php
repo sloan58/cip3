@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Jobs\SyncUcmJob;
-use App\Jobs\UpdateRealtimeDataJob;
-use SoapFault;
 use App\Models\Ucm;
-use App\ApiClients\AxlSoap;
+use App\Jobs\SyncUcmJob;
 use Backpack\CRUD\CrudPanel;
-use App\ApiClients\RisPortSoap;
 use Prologue\Alerts\Facades\Alert;
+use App\Jobs\UpdateRealtimeDataJob;
 use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\UcmRequest as StoreRequest;
 use App\Http\Requests\UcmRequest as UpdateRequest;
@@ -43,13 +40,6 @@ class UcmCrudController extends CrudController
         | CrudPanel Configuration
         |--------------------------------------------------------------------------
         */
-
-//        $this->crud->setColumns([
-//            'Name',
-//            'IP Address',
-//            'Username',
-//            'Version'
-//        ]);
 
         $this->crud->addColumns([
             [

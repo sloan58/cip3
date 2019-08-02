@@ -2,7 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Phone;
+use App\Jobs\DeleteItlJob;
+use Keboola\Csv\CsvReader;
+use Keboola\Csv\Exception;
 use Backpack\CRUD\CrudPanel;
+use Illuminate\Http\Request;
+use Prologue\Alerts\Facades\Alert;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\RedirectResponse;
 use App\Http\Requests\PhoneRequest as StoreRequest;
 use App\Http\Requests\PhoneRequest as UpdateRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
@@ -73,7 +81,10 @@ class PhoneCrudController extends CrudController
         $this->crud->enableDetailsRow();
         $this->crud->allowAccess('details_row');
 
+        // Custom Buttons
+        $this->crud->addButtonFromView('line', 'delete_itl', 'delete_itl', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'export_phones', 'exportPhones', 'beginning');
+        $this->crud->addButtonFromModelFunction('top', 'bulk_delete_itl', 'bulkDeleteItl', 'end');
 
         // add asterisk for fields that are required in PhoneRequest
         $this->crud->setRequiredFields(StoreRequest::class, 'create');
@@ -96,6 +107,59 @@ class PhoneCrudController extends CrudController
         // your additional operations after save here
         // use $this->data['entry'] or $this->crud->entry
         return $redirect_location;
+    }
+
+    /**
+     * @param Phone $phone
+     * @return RedirectResponse
+     */
+    public function deleteItl(Phone $phone)
+    {
+        Log::info("PhoneCrudController@deleteItl: Received Delete ITL request for {$phone->name}");
+        DeleteItlJob::dispatch($phone, backpack_user()->email);
+
+        Alert::success("Delete ITL Submitted for {$phone->name}!")->flash();
+        return back();
+    }
+
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function bulkDeleteItl(Request $request)
+    {
+        Log::info("PhoneCrudController@bulkDeleteItl: Received Bulk Delete ITL request");
+        $file = $request->file('bulkItlDeleteInputFile');
+
+        if(!in_array($file->getClientMimeType(), ['text/plain', 'text/csv'])) {
+            Log::error("PhoneCrudController@bulkDeleteItl: Invalid File Type", [
+                $file->getClientMimeType()
+            ]);
+            Alert::error("Invalid File Type.  Please use .txt or .csv")->flash();
+            return back();
+        }
+
+        Log::info("PhoneCrudController@bulkDeleteItl: File validation passed.  Opening file for reading");
+        $csvFile = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        Log::info("PhoneCrudController@bulkDeleteItl: File opened.  Iterating devices");
+        foreach($csvFile as $row) {
+            $phone = Phone::where('name', $row)->first();
+            if(!$phone) {
+                Log::error('PhoneCrudController@bulkDeleteItl: Phone name was not found in local DB', [
+                    $row
+                ]);
+                continue;
+            }
+            Log::info("PhoneCrudController@bulkDeleteItl: Phone name was found in local DB.  Creating DeleteItlJob", [
+                $phone->name
+            ]);
+            DeleteItlJob::dispatch($phone, backpack_user()->email);
+        }
+
+        Alert::success("Bulk Delete ITL Submitted!")->flash();
+        return back();
+
     }
 
     /**
