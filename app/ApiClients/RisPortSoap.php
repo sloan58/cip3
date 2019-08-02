@@ -120,7 +120,7 @@ class RisPortSoap extends SoapClient
             Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): " .
                               "Checking to see if there is any RisPort data available for devices"
             );
-            
+
             if(!$response->selectCmDeviceReturn->SelectCmDeviceResult->TotalDevicesFound)
             {
                 Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): No device data available to process.");

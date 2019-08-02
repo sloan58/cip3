@@ -22,6 +22,7 @@
         "mistic100/randomcolor": "^1.0",
         "predis/predis": "^1.1",
         "qcod/laravel-app-settings": "^1.0",
+        "sabre/xml": "^2.1",
         "shipping-docker/vessel": "^4.0",
         "usmanhalalit/laracsv": "^2.0"
     },

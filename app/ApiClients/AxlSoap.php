@@ -107,6 +107,33 @@ class AxlSoap extends SoapClient
         }
     }
 
+    public function associatePhoneWithAppUser($phone)
+    {
+        Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Associating IP Phone {$phone->name} " .
+                          "with Application User {$phone->ucm->username}");
+
+        try {
+            $res = $this->updateAppUser([
+                'userid' => $phone->ucm->username,
+                'associatedDevices' => [
+                    'device' => $phone->name
+                ]
+            ]);
+
+            Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Received successful response", [
+                $res->return
+            ]);
+
+            return true;
+
+        } catch(SoapFault $e) {
+            Log::error("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Received unsuccessful response", [
+                $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
     /**
      * @return bool
      * @throws GuzzleException

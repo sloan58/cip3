@@ -19,6 +19,14 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class ProcessPhoneReportJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     *  The number of times to attempt this job
+     *
+     * @var int
+     */
+    public $tries = 1;
+
     /**
      * @var Report
      */

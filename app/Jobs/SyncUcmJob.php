@@ -23,16 +23,16 @@ class SyncUcmJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var Ucm
-     */
-    private $ucm;
-
-    /**
      *  The number of times to attempt this job
      *
      * @var int
      */
     public $tries = 1;
+
+    /**
+     * @var Ucm
+     */
+    private $ucm;
 
     /**
      * Create a new job instance.
