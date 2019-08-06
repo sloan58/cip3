@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Jobs\ProcessPhoneReportJob;
-use Carbon\Carbon;
-use Backpack\CRUD\CrudPanel;
-use App\Http\Requests\ReportRequest as StoreRequest;
-use App\Http\Requests\ReportRequest as UpdateRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 
+// VALIDATION: change the requests to match your own file names if you need form validation
+use App\Http\Requests\EraserRequest as StoreRequest;
+use App\Http\Requests\EraserRequest as UpdateRequest;
+use Backpack\CRUD\CrudPanel;
+
 /**
- * Class ReportCrudController
+ * Class EraserCrudController
  * @package App\Http\Controllers\Admin
  * @property-read CrudPanel $crud
  */
-class ReportCrudController extends CrudController
+class EraserCrudController extends CrudController
 {
     public function setup()
     {
@@ -23,13 +23,9 @@ class ReportCrudController extends CrudController
         | CrudPanel Basic Information
         |--------------------------------------------------------------------------
         */
-        $this->crud->setModel('App\Models\Report');
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/report');
-        $this->crud->setEntityNameStrings('report', 'reports');
-
-        // Custom Buttons
-        $this->crud->removeAllButtonsFromStack('line');
-        $this->crud->addButtonFromView('line', 'download', 'phone_report_download', 'end');
+        $this->crud->setModel('App\Models\Eraser');
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/eraser');
+        $this->crud->setEntityNameStrings('eraser', 'erasers');
 
         /*
         |--------------------------------------------------------------------------
@@ -40,42 +36,20 @@ class ReportCrudController extends CrudController
         // TODO: remove setFromDb() and manually define Fields and Columns
         $this->crud->setFromDb();
 
-        // Remove the Create button
-        $this->crud->removeButton('create');
-        
-        // add asterisk for fields that are required in ReportRequest
+        // Remove buttons.  This CRUD is read only
+        $this->crud->removeAllButtons();
+
+        // add asterisk for fields that are required in EraserRequest
         $this->crud->setRequiredFields(StoreRequest::class, 'create');
         $this->crud->setRequiredFields(UpdateRequest::class, 'edit');
     }
 
     public function store(StoreRequest $request)
     {
-        if($request->request->get('tag')) {
-            $tag = preg_replace('/\'/', '', $request->request->get('tag'));
-            $tag = preg_replace('/\s/', '_', $tag) . '_';
-        } else {
-            $tag = '';
-        }
-        $timestamp = Carbon::now()->timestamp;
-        $filename = "{$tag}{$timestamp}_cip3_phone_report.csv";
-
-        $request->request->add([
-            'type' => 'phone',
-            'filename' => $filename,
-            'submitted_by' => backpack_user()->email,
-            'status' => 'processing'
-        ]);
-
         // your additional operations before save here
         $redirect_location = parent::storeCrud($request);
         // your additional operations after save here
         // use $this->data['entry'] or $this->crud->entry
-
-        ProcessPhoneReportJob::dispatch(
-            $this->crud->entry,
-            $request->request->get('ucms')
-        );
-
         return $redirect_location;
     }
 

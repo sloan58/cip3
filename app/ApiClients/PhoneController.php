@@ -132,12 +132,20 @@ class PhoneController
                     $this->eraser->fail_reason = "Unknown Exception: $e->getMessage()";
                 }
 
-                Log::error("PhoneController@deleteItl: Setting ITL Process to fail");
-                $this->eraser->status = 'finished';
-                $this->eraser->result = 'fail';
-                $this->eraser->save();
-
-                return false;
+                Log::error("PhoneController@deleteItl: Setting ITL Process to fail.  Checking if this was the " .
+                                    "first issued key command");
+                if($index == 0) {
+                    $this->eraser->status = 'finished';
+                    $this->eraser->result = 'fail';
+                    $this->eraser->save();
+                    return false;
+                } else {
+                    $this->eraser->fail_reason = 'Note: timed out after first key.';
+                    $this->eraser->status = 'finished';
+                    $this->eraser->result = 'success';
+                    $this->eraser->save();
+                    return true;
+                }
             }
         }
 
@@ -146,6 +154,6 @@ class PhoneController
         $this->eraser->result = 'success';
         $this->eraser->save();
 
-        return false;
+        return true;
     }
 }

@@ -29,4 +29,5 @@ Route::group([
     // Report Routes
     CRUD::resource('report', 'ReportCrudController');
 
+    CRUD::resource('eraser', 'EraserCrudController');
 }); // this should be the absolute last line of this file

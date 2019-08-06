@@ -3,18 +3,16 @@
 namespace App\Jobs;
 
 use SoapFault;
+use Throwable;
 use Carbon\Carbon;
 use App\Models\Ucm;
-use GuzzleHttp\Client;
 use App\ApiClients\AxlSoap;
 use Illuminate\Bus\Queueable;
-use GuzzleHttp\RequestOptions;
 use App\ApiClients\RisPortSoap;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -92,5 +90,14 @@ class SyncUcmJob implements ShouldQueue
 
             $this->ucm->sendWebexTeamsNotification($message);
         }
+    }
+
+    public function failed(Throwable $exception)
+    {
+        Log::error(
+            "SyncUcmJob@failed ({$this->ucm->name}): This job done failed people!", [
+                $exception->getMessage()
+            ]
+        );
     }
 }
