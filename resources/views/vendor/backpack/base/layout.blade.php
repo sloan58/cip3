@@ -35,7 +35,7 @@
         <section class="content">
 
             @include('modals.bulk-delete-itl')
-            @include('modals.push-background', ['images' => ['MD_Seal_7965_7945.png']])
+            @include('modals.push-background')
             @include('modals.export-phones', ['ucms' => \App\Models\Ucm::select('name')->get()])
 
             @yield('content')

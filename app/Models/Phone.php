@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Backpack\CRUD\CrudTrait;
+use Illuminate\Support\Facades\File;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -85,6 +86,23 @@ class Phone extends Model
         $bgid = BgImageDimension::where('model', $this->model)->first();
 
         return $bgid ? $bgid->full_size : null;
+    }
+
+    /**
+     * Get the available image files for this Phone
+     *
+     * @return array
+     */
+    public function getAvailableImages()
+    {
+        return array_filter(array_map(function($file) {
+            $fileName = $file->getFileName();
+            if(preg_match('/_thumb\.png$/', $fileName)) {
+                return false;
+            }
+            return $fileName;
+        }, File::files(storage_path("app/public/backgrounds/{$this->getFullSizeBgDimensions()}"))
+        ));
     }
 
     /**

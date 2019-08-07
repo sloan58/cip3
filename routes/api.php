@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Phone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,12 @@ use Illuminate\Http\Request;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Get the supported image files for a particular phone model
+Route::get('/phone-images/{phoneName}', function($phoneName) {
+    $images = Phone::where('name', $phoneName)->first()->getAvailableImages();
+    return response([
+        'images' => $images
+    ], 200);
 });
