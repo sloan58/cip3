@@ -35,6 +35,7 @@ class PhoneController
         $this->client = new Client([
             'base_uri' => 'http://' . $phone->currentIpAddress(),
             'verify' => false,
+            'timeout' => 10,
             'connect_timeout' => 2,
             'headers' => [
                 'Accept' => 'application/xml',
