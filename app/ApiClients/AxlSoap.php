@@ -307,4 +307,64 @@ class AxlSoap extends SoapClient
         }
         Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Iterating items completed.  Done!");
     }
+
+    public function supportsBackgroundApi(Phone $phone)
+    {
+        Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Checking if device settings allow the " .
+                          "remote operation to set background images");
+        try {
+            $res = $this->getPhone([
+                'name' => $phone->name,
+                'returnedTags' => [
+                    'loadInformation' => '',
+                    'phoneSuite' => ''
+                ]
+            ]);
+
+            Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Received successful AXL Response", [
+                $res->return->phone ?? null
+            ]);
+
+            $loadInfo = $res->return->phone->loadInformation->_;
+            $phonePersonalization = $res->return->phone->phoneSuite;
+
+            Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Found Load and Phone Personalization settings ", [
+                $loadInfo, $phonePersonalization
+            ]);
+
+            Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Checking firmware version");
+            $segments = preg_split('/\s|\.|\-/', $loadInfo);
+
+            if($segments[1] < 9 || ($segments[1] == 9 && $segments[2] < 1)) {
+                Log::error("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Phone firmware is not supported for this action");
+                return [
+                    'success' => false,
+                    'reason' => 'Firmware version unsupported'
+                ];
+            }
+            Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Firmware version is supported");
+
+
+            Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Checking phone personalization setting");
+            if($phonePersonalization != "Enabled") {
+                Log::error("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Phone personalization is not enabled");
+                return [
+                    'success' => false,
+                    'reason' => 'Phone personalization disabled'
+                ];
+            }
+
+            Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Load and Phone Personalization settings pass checks.");
+            return [
+                'success' => true
+            ];
+
+        } catch (\SoapFault $e) {
+            Log::error("PushBackgroundImage ({$this->phone->name}): Received AXL Soap Fault", [$e->faultstring, $e->getMessage()]);
+            return [
+                'success' => false,
+                'reason' => 'AXL API error (Check logs)'
+            ];
+        }
+    }
 }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateErasersTable extends Migration
+class CreateRemoteOperationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateErasersTable extends Migration
      */
     public function up()
     {
-        Schema::create('erasers', function (Blueprint $table) {
+        Schema::create('remote_operations', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('requested_by');
             $table->string('phone');
@@ -22,8 +22,8 @@ class CreateErasersTable extends Migration
                     ->on('phones')
                     ->onDelete('cascade');
             $table->string('ip_address')->nullable();
-            $table->enum('type', ['itl'])
-                    ->default('itl');
+            $table->enum('type', ['itl-delete', 'background-push']);
+            $table->string('image')->nullable();
             $table->enum('status', ['in_progress', 'finished'])
                     ->default('in_progress');
             $table->enum('result', ['success', 'fail']);
@@ -39,6 +39,6 @@ class CreateErasersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('erasers');
+        Schema::dropIfExists('remote_operations');
     }
 }

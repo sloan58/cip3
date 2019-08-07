@@ -22,6 +22,7 @@ Route::group([
     // Phone Routes
     Route::get('/phone/{phone}/delete-itl', 'PhoneCrudController@deleteItl');
     Route::post('bulk-itl', 'PhoneCrudController@bulkDeleteItl');
+    Route::post('push-background', 'PhoneCrudController@pushBackground');
     CRUD::resource('phone', 'PhoneCrudController')->with(function() {
         Route::get('/phone/export', 'PhoneCrudController@export');
     });
@@ -29,5 +30,5 @@ Route::group([
     // Report Routes
     CRUD::resource('report', 'ReportCrudController');
 
-    CRUD::resource('eraser', 'EraserCrudController');
+    CRUD::resource('remote-operation', 'RemoteOperationCrudController');
 }); // this should be the absolute last line of this file

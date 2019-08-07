@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateReportsTable extends Migration
+class CreateBgImageDimensionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,11 @@ class CreateReportsTable extends Migration
      */
     public function up()
     {
-        Schema::create('reports', function (Blueprint $table) {
+        Schema::create('bg_image_dimensions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('filename');
-            $table->enum('type', ['phone']);
-            $table->enum('status', ['processing', 'finished', 'failed']);
-            $table->string('submitted_by');
+            $table->string('model')->unique();
+            $table->string('full_size');
+            $table->string('thumb');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ class CreateReportsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reports');
+        Schema::dropIfExists('bg_image_dimensions');
     }
 }

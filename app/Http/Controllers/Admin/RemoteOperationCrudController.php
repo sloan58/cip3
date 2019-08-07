@@ -10,11 +10,11 @@ use App\Http\Requests\EraserRequest as UpdateRequest;
 use Backpack\CRUD\CrudPanel;
 
 /**
- * Class EraserCrudController
+ * Class RemoteOperationCrudController
  * @package App\Http\Controllers\Admin
  * @property-read CrudPanel $crud
  */
-class EraserCrudController extends CrudController
+class RemoteOperationCrudController extends CrudController
 {
     public function setup()
     {
@@ -23,9 +23,9 @@ class EraserCrudController extends CrudController
         | CrudPanel Basic Information
         |--------------------------------------------------------------------------
         */
-        $this->crud->setModel('App\Models\Eraser');
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/eraser');
-        $this->crud->setEntityNameStrings('eraser', 'erasers');
+        $this->crud->setModel('App\Models\RemoteOperation');
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/remote-operation');
+        $this->crud->setEntityNameStrings('remote-operation', 'remote-operation');
 
         /*
         |--------------------------------------------------------------------------

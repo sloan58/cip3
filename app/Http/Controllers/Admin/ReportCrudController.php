@@ -42,7 +42,7 @@ class ReportCrudController extends CrudController
 
         // Remove the Create button
         $this->crud->removeButton('create');
-        
+
         // add asterisk for fields that are required in ReportRequest
         $this->crud->setRequiredFields(StoreRequest::class, 'create');
         $this->crud->setRequiredFields(UpdateRequest::class, 'edit');

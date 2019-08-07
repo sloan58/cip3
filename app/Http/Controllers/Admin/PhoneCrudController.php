@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Jobs\PushPhoneBackgroundImageJob;
 use App\Models\Phone;
 use App\Jobs\DeleteItlJob;
 use Keboola\Csv\CsvReader;
@@ -82,7 +83,8 @@ class PhoneCrudController extends CrudController
         $this->crud->allowAccess('details_row');
 
         // Custom Buttons
-        $this->crud->addButtonFromView('line', 'delete_itl', 'delete_itl', 'beginning');
+        $this->crud->addButtonFromView('line', 'phone_delete_itl', 'phone_delete_itl', 'beginning');
+        $this->crud->addButtonFromView('line', 'phone_push_background', 'phone_push_background', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'export_phones', 'exportPhones', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'bulk_delete_itl', 'bulkDeleteItl', 'end');
 
@@ -160,6 +162,22 @@ class PhoneCrudController extends CrudController
         Alert::success("Bulk Delete ITL Submitted!")->flash();
         return back();
 
+    }
+
+    public function pushBackground(Request $request)
+    {
+        Log::info("PhoneCrudController@pushBackground: Received Bulk Delete ITL request");
+
+        [$phone, $image] = [$request->phone, $request->image];
+        Log::info("PhoneCrudController@pushBackground: Set POST params", [
+            $phone, $image
+        ]);
+
+        Log::info("PhoneCrudController@pushBackground: Dispatching PushPhoneBackgroundImageJob");
+        PushPhoneBackgroundImageJob::dispatch(Phone::where('name', $phone)->first(), backpack_user()->email, $image);
+
+        Alert::success("Pushing new background image!")->flash();
+        return back();
     }
 
     /**

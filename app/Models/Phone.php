@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Backpack\CRUD\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Phone extends Model
 {
@@ -74,6 +74,31 @@ class Phone extends Model
     {
         return $this->realtime_data[0]['Status'] == 'Registered' ? true : false;
     }
+
+    /**
+     * Get the full size dimensions for the models background image
+     *
+     * @return mixed
+     */
+    public function getFullSizeBgDimensions()
+    {
+        $bgid = BgImageDimension::where('model', $this->model)->first();
+
+        return $bgid ? $bgid->full_size : null;
+    }
+
+    /**
+     * Get the thumb size dimensions for the models background image
+     *
+     * @return mixed
+     */
+    public function getThumbSizeBgDimensions()
+    {
+        $bgid = BgImageDimension::where('model', $this->model)->first();
+
+        return $bgid ? $bgid->thumb : null;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -101,13 +126,13 @@ class Phone extends Model
     }
 
     /**
-     *  A Phone Has Many Eraser events
+     *  A Phone Has Many RemoteOperation events
      *
      * @return HasMany
      */
     public function erasers()
     {
-        return $this->hasMany(Eraser::class, 'name', 'phone');
+        return $this->hasMany(RemoteOperation::class, 'name', 'phone');
     }
 
     /*

@@ -33,7 +33,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            ItlsSeeder::class
+            ItlsSeeder::class,
+            BgImageDimensionSeeder::class
         ]);
     }
 }

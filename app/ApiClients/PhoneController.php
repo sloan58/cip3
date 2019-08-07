@@ -7,7 +7,7 @@ namespace App\ApiClients;
 use App\Models\Phone;
 use Sabre\Xml\Reader;
 use GuzzleHttp\Client;
-use App\Models\Eraser;
+use App\Models\RemoteOperation;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
@@ -16,9 +16,9 @@ use GuzzleHttp\Exception\ConnectException;
 class PhoneController
 {
     /**
-     * @var Eraser
+     * @var RemoteOperation
      */
-    private $eraser;
+    private $remoteOperation;
     /**
      * @var Phone
      */
@@ -27,9 +27,9 @@ class PhoneController
     /**
      * PhoneController constructor.
      * @param Phone $phone
-     * @param Eraser $eraser
+     * @param RemoteOperation $remoteOperation
      */
-    function __construct(Phone $phone, Eraser $eraser)
+    function __construct(Phone $phone, RemoteOperation $remoteOperation)
     {
 
         $this->client = new Client([
@@ -45,7 +45,7 @@ class PhoneController
             ],
         ]);
 
-        $this->eraser = $eraser;
+        $this->remoteOperation = $remoteOperation;
         $this->phone = $phone;
 
         $this->reader = new Reader;
@@ -100,10 +100,10 @@ class PhoneController
                     }
                     Log::error("PhoneController@deleteItl: Error message: ", [$errorType]);
                     Log::error("PhoneController@deleteItl: Setting ITL Process to fail");
-                    $this->eraser->fail_reason = $errorType;
-                    $this->eraser->status = 'finished';
-                    $this->eraser->result = 'fail';
-                    $this->eraser->save();
+                    $this->remoteOperation->fail_reason = $errorType;
+                    $this->remoteOperation->status = 'finished';
+                    $this->remoteOperation->result = 'fail';
+                    $this->remoteOperation->save();
 
                     return false;
                 }
@@ -118,42 +118,88 @@ class PhoneController
                 if($e instanceof ClientException)
                 {
                     //Unauthorized
-                    $this->eraser->fail_reason = "Authentication Exception";
+                    $this->remoteOperation->fail_reason = "Authentication Exception";
 
                 }
                 elseif($e instanceof ConnectException)
                 {
                     //Can't Connect
-                    $this->eraser->fail_reason = "Connection Exception";
+                    $this->remoteOperation->fail_reason = "Connection Exception";
                 }
                 else
                 {
                     //Other exception
-                    $this->eraser->fail_reason = "Unknown Exception: $e->getMessage()";
+                    $this->remoteOperation->fail_reason = "Unknown Exception: $e->getMessage()";
                 }
 
                 Log::error("PhoneController@deleteItl: Setting ITL Process to fail.  Checking if this was the " .
                                     "first issued key command");
                 if($index == 0) {
-                    $this->eraser->status = 'finished';
-                    $this->eraser->result = 'fail';
-                    $this->eraser->save();
+                    $this->remoteOperation->status = 'finished';
+                    $this->remoteOperation->result = 'fail';
+                    $this->remoteOperation->save();
                     return false;
                 } else {
-                    $this->eraser->fail_reason = 'Note: timed out after first key.';
-                    $this->eraser->status = 'finished';
-                    $this->eraser->result = 'success';
-                    $this->eraser->save();
+                    $this->remoteOperation->fail_reason = 'Note: timed out after first key.';
+                    $this->remoteOperation->status = 'finished';
+                    $this->remoteOperation->result = 'success';
+                    $this->remoteOperation->save();
                     return true;
                 }
             }
         }
 
         Log::info("PhoneController@deleteItl: ITL Delete completed successfully");
-        $this->eraser->status = 'finished';
-        $this->eraser->result = 'success';
-        $this->eraser->save();
+        $this->remoteOperation->status = 'finished';
+        $this->remoteOperation->result = 'success';
+        $this->remoteOperation->save();
 
         return true;
+    }
+
+    public function pushBackgroundImage($image)
+    {
+        Log::info('PhoneController@pushBackgroundImage: Starting pushBackgroundImage process');
+
+        $fullImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/$image";
+        $thumbImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/MD_District_Seal_thumb.png";
+
+        $xml = "XML=<setBackground><background><image>$fullImage</image><icon>$thumbImage</icon></background></setBackground>";
+        Log::info('PhoneController@pushBackgroundImage: Set XML body', [
+            $xml
+        ]);
+
+        Log::info('PhoneController@pushBackgroundImage: Sending HTTP request to phone');
+        try {
+            $response = $this->client->post('CGI/Execute',['body' => $xml]);
+
+            Log::info("PhoneController@pushBackgroundImage: Received Guzzle HTTP Response from IP Phone - ", [
+                $response->getReasonPhrase(),
+                $xml
+            ]);
+
+            $this->remoteOperation->status = 'finished';
+            $this->remoteOperation->result = 'success';
+            $this->remoteOperation->save();
+            return true;
+
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                Log::error("PhoneController@pushBackgroundImage: Received Guzzle HTTP Client Error - ", [
+                    'Response' => $e->getResponse()->getBody(),
+                    'Request' => $e->getRequest()->getBody()
+                ]);
+                $this->remoteOperation->fail_reason = $e->getResponse()->getBody();
+            } else {
+                Log::error("PhoneController@pushBackgroundImage: Received Guzzle HTTP Client Timeout");
+                $this->remoteOperation->fail_reason = 'timeout';
+            }
+
+            $this->remoteOperation->status = 'finished';
+            $this->remoteOperation->result = 'fail';
+            $this->remoteOperation->save();
+            return false;
+
+        }
     }
 }
