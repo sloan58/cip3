@@ -163,7 +163,7 @@ class PhoneController
         Log::info('PhoneController@pushBackgroundImage: Starting pushBackgroundImage process');
 
         $fullImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/$image";
-        $thumbImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/MD_District_Seal_thumb.png";
+        $thumbImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/" . basename($image,'.png') . "_thumb.png";
 
         $xml = "XML=<setBackground><background><image>$fullImage</image><icon>$thumbImage</icon></background></setBackground>";
         Log::info('PhoneController@pushBackgroundImage: Set XML body', [
