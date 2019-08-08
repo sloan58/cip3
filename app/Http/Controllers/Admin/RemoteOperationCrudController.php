@@ -26,6 +26,7 @@ class RemoteOperationCrudController extends CrudController
         $this->crud->setModel('App\Models\RemoteOperation');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/remote-operation');
         $this->crud->setEntityNameStrings('Action History', 'Action Histories');
+        $this->crud->orderBy('updated_at', 'DESC');
 
         /*
         |--------------------------------------------------------------------------
@@ -35,6 +36,14 @@ class RemoteOperationCrudController extends CrudController
 
         // TODO: remove setFromDb() and manually define Fields and Columns
         $this->crud->setFromDb();
+        $this->crud->addColumn(
+            [
+                'name' => "updated_at", // The db column name
+                'label' => "Updated At", // Table column heading
+                'type' => "datetime",
+                // 'format' => 'l j F Y H:i:s', // use something else than the base.default_datetime_format config value
+            ]
+        );
 
         // Remove buttons.  This CRUD is read only
         $this->crud->removeAllButtons();

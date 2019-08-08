@@ -34,6 +34,7 @@ class PhoneCrudController extends CrudController
         $this->crud->setModel('App\Models\Phone');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/phone');
         $this->crud->setEntityNameStrings('phone', 'phones');
+        $this->crud->orderBy('device_pool', 'ASC');
 
         /*
         |--------------------------------------------------------------------------
