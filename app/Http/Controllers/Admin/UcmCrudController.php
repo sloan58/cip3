@@ -30,7 +30,7 @@ class UcmCrudController extends CrudController
         */
         $this->crud->setModel('App\Models\Ucm');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/ucm');
-        $this->crud->setEntityNameStrings('ucm', 'ucms');
+        $this->crud->setEntityNameStrings('Unified Communications Manager', 'Unified Communications Managers');
 
         // Custom Buttons
         $this->crud->addButtonFromView('line', 'sync', 'ucm_sync', 'beginning');

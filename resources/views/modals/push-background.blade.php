@@ -52,7 +52,9 @@
                         // Build the select list
                         response.json().then(function(data) {
                             $('select[name="image"]')
-                                .html( '<option>' + data.images.join( '</option><option>' ) + '</option>' );
+                                .html( data.images.map(function(image) {
+                                    return `<option value="${image.id}">${image.name}</option>`;
+                                }));
                         });
                     }
                 )

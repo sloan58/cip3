@@ -26,7 +26,7 @@ class BgImageCrudController extends CrudController
         */
         $this->crud->setModel('App\Models\BgImage');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/bgimage');
-        $this->crud->setEntityNameStrings('bgimage', 'bg_images');
+        $this->crud->setEntityNameStrings('Background Image', 'Background Images');
 
         /*
         |--------------------------------------------------------------------------

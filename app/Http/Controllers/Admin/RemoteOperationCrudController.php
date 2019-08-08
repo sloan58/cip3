@@ -25,7 +25,7 @@ class RemoteOperationCrudController extends CrudController
         */
         $this->crud->setModel('App\Models\RemoteOperation');
         $this->crud->setRoute(config('backpack.base.route_prefix') . '/remote-operation');
-        $this->crud->setEntityNameStrings('remote-operation', 'remote-operation');
+        $this->crud->setEntityNameStrings('Action History', 'Action Histories');
 
         /*
         |--------------------------------------------------------------------------

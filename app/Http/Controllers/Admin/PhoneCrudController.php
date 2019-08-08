@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\BgImage;
 use App\Models\Phone;
 use App\Jobs\DeleteItlJob;
 use Backpack\CRUD\CrudPanel;
@@ -172,7 +173,7 @@ class PhoneCrudController extends CrudController
         ]);
 
         Log::info("PhoneCrudController@pushBackground: Dispatching PushPhoneBackgroundImageJob");
-        PushPhoneBackgroundImageJob::dispatch(Phone::where('name', $phone)->first(), backpack_user()->email, $image);
+        PushPhoneBackgroundImageJob::dispatch(Phone::find($phone), backpack_user()->email, BgImage::find($image)->image);
 
         Alert::success("Pushing new background image!")->flash();
         return back();

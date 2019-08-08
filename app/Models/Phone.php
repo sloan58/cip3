@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Phone extends Model
 {
@@ -89,23 +90,6 @@ class Phone extends Model
     }
 
     /**
-     * Get the available image files for this Phone
-     *
-     * @return array
-     */
-    public function getAvailableImages()
-    {
-        return array_filter(array_map(function($file) {
-            $fileName = $file->getFileName();
-            if(preg_match('/_thumb\.png$/', $fileName)) {
-                return false;
-            }
-            return $fileName;
-        }, File::files(storage_path("app/public/backgrounds/{$this->getFullSizeBgDimensions()}"))
-        ));
-    }
-
-    /**
      * Get the thumb size dimensions for the models background image
      *
      * @return mixed
@@ -151,6 +135,26 @@ class Phone extends Model
     public function erasers()
     {
         return $this->hasMany(RemoteOperation::class, 'name', 'phone');
+    }
+
+    /**
+     * A Phone Belongs To a BgImageDimension
+     *
+     * @return BelongsTo
+     */
+    public function bgImageDimensions()
+    {
+        return $this->belongsTo(BgImageDimension::class, 'model', 'model');
+    }
+
+    /**
+     * A Phone Has Many BgImage through BgImageDimensions
+     *
+     * @return HasManyThrough
+     */
+    public function bgImages()
+    {
+        return $this->hasManyThrough(BgImage::class, BgImageDimension::class, 'model', 'dimensions', 'model', 'full_size');
     }
 
     /*

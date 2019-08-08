@@ -20,8 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 // Get the supported image files for a particular phone model
-Route::get('/phone-images/{phoneName}', function($phoneName) {
-    $images = Phone::where('name', $phoneName)->first()->getAvailableImages();
+Route::get('/phone-images/{phone}', function(Phone $phone) {
+    $images = $phone->bgImages;
     return response([
         'images' => $images
     ], 200);
