@@ -39,7 +39,7 @@ class Phone extends Model
     public function exportPhones($crud = false)
     {
         return '<button type="button" class="btn btn-primary ladda-button" data-toggle="modal" data-target="#exportPhones"><i class="fa fa-clipboard"></i>
-                        Export All
+                        Export
                 </button>';
     }
 
