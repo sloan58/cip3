@@ -73,6 +73,7 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
         Log::info('PushPhoneBackgroundImageJob@handle: Creating RemoteOperation object');
         $remoteOperation = new RemoteOperation;
         $remoteOperation->type = 'background-push';
+        $remoteOperation->image = $this->image;
         $remoteOperation->phone = $this->phone->name;
         $remoteOperation->requested_by = $this->requestedBy;
 
