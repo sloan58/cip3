@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Jobs\PushPhoneBackgroundImageJob;
 use App\Models\Phone;
 use App\Jobs\DeleteItlJob;
-use Keboola\Csv\CsvReader;
-use Keboola\Csv\Exception;
 use Backpack\CRUD\CrudPanel;
 use Illuminate\Http\Request;
 use Prologue\Alerts\Facades\Alert;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\RedirectResponse;
+use App\Jobs\PushPhoneBackgroundImageJob;
 use App\Http\Requests\PhoneRequest as StoreRequest;
 use App\Http\Requests\PhoneRequest as UpdateRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;

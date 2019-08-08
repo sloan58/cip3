@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\BgImage;
+use App\Observers\BgImageObserver;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Redis::enableEvents();
+        BgImage::observe(BgImageObserver::class);
     }
 }

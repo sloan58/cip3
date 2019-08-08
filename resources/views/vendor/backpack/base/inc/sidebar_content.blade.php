@@ -7,8 +7,8 @@
     <ul class="treeview-menu">
         <li><a href='{{ backpack_url('phone') }}'><span>Search</span></a></li>
         <li><a href='{{ backpack_url('remote-operation') }}'><span>Action History</span></a></li>
-        <li><a href='{{ backpack_url('report') }}'><span>Reports</span></a></li>
-        <li><a href='{{ backpack_url('report') }}'><span>Background Images</span></a></li>
+        <li><a href='{{ backpack_url('report') }}'><span>Download Reports</span></a></li>
+        <li><a href='{{ backpack_url('bgimage') }}'><span>Background Images</span></a></li>
     </ul>
 </li>
 <li><a href="{{ backpack_url('user') }}"><i class="fa fa-user"></i> <span>Users</span></a></li>

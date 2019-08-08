@@ -23,6 +23,7 @@ Route::group([
     Route::get('/phone/{phone}/delete-itl', 'PhoneCrudController@deleteItl');
     Route::post('bulk-itl', 'PhoneCrudController@bulkDeleteItl');
     Route::post('push-background', 'PhoneCrudController@pushBackground');
+    CRUD::resource('bgimage', 'BgImageCrudController');
     CRUD::resource('phone', 'PhoneCrudController')->with(function() {
         Route::get('/phone/export', 'PhoneCrudController@export');
     });
