@@ -9,16 +9,16 @@ The current version offers the following:
 
 - Cisco UCM Server(s) CRUD interface
 - Sync Cisco UCM Phones/Devices and RisPort data daily and on-demand
-- Sync History
+- UCM Sync History
 - Sync success/fail notifications via Webex Teams BYOB (Bring Your Own Bot)
-- Display device information and real-time data (IP Address, Firmware, etc) 
+- Display device information and real-time data (IP Address, Firmware, etc)
+- Delete ITL files from IP Phones
+- Push custom background images to IP Phones 
 - Manage User accounts
 
 Here's some of the packages included:
 
 [Laravel 5.8](www.laravel.com) - the core application framework
-
-[Laravel Telescope](https://laravel.com/docs/5.8/telescope) - an elegant debug assistant for the Laravel framework
 
 [Laravel Backpack](https://laravel-backpack.readme.io/docs) - for rapid UI prototyping
 
@@ -59,6 +59,18 @@ cp .env.example .env
 ./vessel art migrate --seed
 ```
 
+If you're using the app to push custom background images, you'll need to set the `APP_URL` in `.env`
+
+```bash
+APP_URL=http://<your.local.ip.address>:8000
+```
+
+And also link the `public/storage` directory
+
+```bash
+./vessel artisan storage:link
+```
+
 Windows:
 
 *TODO*
@@ -80,6 +92,17 @@ php artisan migrate --seed
 ```
 Be sure to configure your `.env` file to match your local resource configurations!
 
+```bash
+APP_URL=http://<your.local.ip.address>:8000
+```
+
+And also link the `public/storage` directory
+
+```bash
+./vessel artisan storage:link
+```
+
+
 Windows:
 
 *TODO*
@@ -100,46 +123,16 @@ Once the app is running (and if you've seeded the database) you can login with:
 
 `Password:` password123
 
-Below are some sample screenshots after syncing my lab system.
-
 ### Screenshots
 
-#### Dashboard
-![image](https://user-images.githubusercontent.com/6303820/59216094-e4af0800-8b88-11e9-919c-086ee2f6d62f.png)
+Check out the [screenshots](https://placeit) folder for some visuals
 
-#### UCM List
-![image](https://user-images.githubusercontent.com/6303820/59216141-014b4000-8b89-11e9-9e9f-72ea60d524d1.png)
-
-#### Sync Details
-![image](https://user-images.githubusercontent.com/6303820/59388754-993c5b80-8d3a-11e9-8464-7d573ffe03f8.png)
-
-
-#### UCM Add/Edit
-![image](https://user-images.githubusercontent.com/6303820/59216225-35266580-8b89-11e9-89d6-014ce270a37a.png)
-
-#### Phone/Device Details
-![image](https://user-images.githubusercontent.com/6303820/59225219-25fde280-8b9e-11e9-936b-12e91ac0c444.png)
-
-#### Webex Teams Integration
-![image](https://user-images.githubusercontent.com/6303820/59388678-65f9cc80-8d3a-11e9-9f56-60a1f3d21084.png)
-
-![image](https://user-images.githubusercontent.com/6303820/59388708-78740600-8d3a-11e9-8b2a-3da2f6b992c1.png)
-
-
-## Todo
-
-- Create some roles and permissions
-- Create a docker-compose file that pulls in the app, rather than the app pulling in Docker
-- LDAP integration - I've used the [adldap2 package](https://github.com/Adldap2/Adldap2) before, which works nicely.
-- Tests, for goodness' sake!
-
-## New Features / Wish List
-- UCM CURRI Integration for selective call blocking - I have code if anyone wants to help integrate.
-- UCM CDR's - import CDR's into CIP<sup>3</sup> and attach them to the devices for search/visibility.  I have a bash script to import into MySQL but an Elasticsearch container would be great!
-- UCM Audit Logs - Correlate audit log events with devices in CIP<sup>3</sup> (Elasticsearch again?)
-- Custom IP Phone Background images - I have code for this to get started.  It accepts an uploaded file and converts the image to the necessary formats for a list of IP Phones (and the thumbnails), then pushes them out using the `setBackground` API
-- UCM PerfMon integration - I have some starter code that syncs PerfMon Objects and Classes.  Multi-cluster DB replication status perhaps?
-- Call Recording - I have call recording with Asterisk working as a POC, but it needs some significant work to make it basically useful.  I can share my Asterisk `extensions.conf` and `sip.conf`.  This is pretty ambitious but would be awesome to have an open-source recording solution for UCM!
+## Wish List
+- UCM CURRI call blocking
+- UCM CDR's
+- UCM Audit Logs
+- UCM PerfMon integration
+- Call Recording
    
 ## Contributing
 
