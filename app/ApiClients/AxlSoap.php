@@ -294,13 +294,14 @@ class AxlSoap extends SoapClient
                 [
                     'name' => $item->name,
                     'ucm_id' => $this->ucm->id
-                ],
-                [
-                    'description' => $item->description,
-                    'model' => $item->model,
-                    'device_pool' => $item->devicePoolName->_
                 ]
             );
+
+            $phone->description = $item->description;
+            $phone->model= $item->model;
+            $phone->device_pool= $item->devicePoolName->_;
+            $phone->save();
+            
             Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Stored Item", [
                 'phoneId' => $phone->id
             ]);
