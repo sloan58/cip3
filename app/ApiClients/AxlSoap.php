@@ -290,7 +290,7 @@ class AxlSoap extends SoapClient
         Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Iterating items for local storage");
         foreach ($iterate as $item) {
             Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Processing item", [$item->name]);
-            $phone = Phone::firstOrCreate(
+            $phone = Phone::firstOrNew(
                 [
                     'name' => $item->name,
                     'ucm_id' => $this->ucm->id
@@ -301,7 +301,7 @@ class AxlSoap extends SoapClient
             $phone->model= $item->model;
             $phone->device_pool= $item->devicePoolName->_;
             $phone->save();
-            
+
             Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Stored Item", [
                 'phoneId' => $phone->id
             ]);
