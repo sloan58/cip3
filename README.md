@@ -125,7 +125,7 @@ Once the app is running (and if you've seeded the database) you can login with:
 
 ### Screenshots
 
-Check out the [screenshots](https://placeit) folder for some visuals
+Check out the [screenshots](https://github.com/sloan58/cip3/tree/master/screenshots) folder for some visuals
 
 ## Wish List
 - UCM CURRI call blocking
