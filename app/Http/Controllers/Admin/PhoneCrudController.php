@@ -133,7 +133,7 @@ class PhoneCrudController extends CrudController
         Log::info("PhoneCrudController@bulkDeleteItl: Received Bulk Delete ITL request");
         $file = $request->file('bulkItlDeleteInputFile');
 
-        if(!in_array($file->getClientMimeType(), ['text/plain', 'text/csv'])) {
+        if (!in_array($file->getClientMimeType(), ['text/plain', 'text/csv'])) {
             Log::error("PhoneCrudController@bulkDeleteItl: Invalid File Type", [
                 $file->getClientMimeType()
             ]);
@@ -145,9 +145,9 @@ class PhoneCrudController extends CrudController
         $csvFile = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
         Log::info("PhoneCrudController@bulkDeleteItl: File opened.  Iterating devices");
-        foreach($csvFile as $row) {
+        foreach ($csvFile as $row) {
             $phone = Phone::where('name', $row)->first();
-            if(!$phone) {
+            if (!$phone) {
                 Log::error('PhoneCrudController@bulkDeleteItl: Phone name was not found in local DB', [
                     $row
                 ]);
@@ -161,12 +161,11 @@ class PhoneCrudController extends CrudController
 
         Alert::success("Bulk Delete ITL Submitted!")->flash();
         return back();
-
     }
 
     public function pushBackground(Request $request)
     {
-        Log::info("PhoneCrudController@pushBackground: Received Bulk Delete ITL request");
+        Log::info("PhoneCrudController@pushBackground: Received pushBackground request");
 
         [$phone, $image] = [$request->phone, $request->image];
         Log::info("PhoneCrudController@pushBackground: Set POST params", [

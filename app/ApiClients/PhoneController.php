@@ -19,10 +19,16 @@ class PhoneController
      * @var RemoteOperation
      */
     private $remoteOperation;
+
     /**
      * @var Phone
      */
     private $phone;
+
+    /**
+     * @var hasAlreadyTimedOut
+     */
+    private $hasAlreadyTimedOut;
 
     /**
      * PhoneController constructor.
@@ -46,6 +52,8 @@ class PhoneController
             ],
         ]);
 
+        $this->hasAlreadyTimedOut = false;
+
         $this->remoteOperation = $remoteOperation;
         $this->phone = $phone;
 
@@ -58,23 +66,22 @@ class PhoneController
         Log::info("PhoneController@deleteItl: Iterating keys for phone model {$this->phone->model}", [
             $this->phone->itl->sequence
         ]);
-        foreach($this->phone->itl->sequence as $index => $keyPress) {
+        foreach ($this->phone->itl->sequence as $index => $keyPress) {
 
             Log::debug("PhoneController@deleteItl: Processing key {$keyPress}");
 
-            if ($keyPress == "Key:Sleep")
-            {
+            if ($keyPress == "Key:Sleep") {
                 sleep(2);
                 continue;
             }
 
             $xml = 'XML=<CiscoIPPhoneExecute><ExecuteItem Priority="0" URL="' . $keyPress . '"/></CiscoIPPhoneExecute>';
-            Log::debug("PhoneController@deleteItl: Set XML Object: ", [ $xml ]);
+            Log::debug("PhoneController@deleteItl: Set XML Object: ", [$xml]);
 
             Log::debug("PhoneController@deleteItl: Calling IP Phone API");
             try {
 
-                $response = $this->client->post('http://' . $this->phone->currentIpAddress() . '/CGI/Execute',['body' => $xml]);
+                $response = $this->client->post('http://' . $this->phone->currentIpAddress() . '/CGI/Execute', ['body' => $xml]);
 
                 $this->reader->xml($response->getBody()->getContents());
                 $response = $this->reader->parse();
@@ -83,12 +90,10 @@ class PhoneController
                     $response
                 ]);
 
-                if(isset($response['name']) &&  $response['name'] == '{}CiscoIPPhoneError')
-                {
+                if (isset($response['name']) &&  $response['name'] == '{}CiscoIPPhoneError') {
                     Log::error("PhoneController@deleteItl: Got an error in the IP Phone response");
                     //Log an Error
-                    switch($response['attributes']['Number'])
-                    {
+                    switch ($response['attributes']['Number']) {
                         case 4:
                             $errorType = 'Authentication Exception';
                             break;
@@ -108,7 +113,6 @@ class PhoneController
 
                     return false;
                 }
-
             } catch (RequestException $e) {
 
                 Log::error("PhoneController@deleteItl: Got an error in the API response", [$e->getMessage()]);
@@ -116,26 +120,20 @@ class PhoneController
                 /*
                  * Handle an exception from the Guzzle client itself
                  */
-                if($e instanceof ClientException)
-                {
+                if ($e instanceof ClientException) {
                     //Unauthorized
                     $this->remoteOperation->fail_reason = "Authentication Exception";
-
-                }
-                elseif($e instanceof ConnectException)
-                {
+                } elseif ($e instanceof ConnectException) {
                     //Can't Connect
                     $this->remoteOperation->fail_reason = "Connection Exception";
-                }
-                else
-                {
+                } else {
                     //Other exception
                     $this->remoteOperation->fail_reason = "Unknown Exception: $e->getMessage()";
                 }
 
                 Log::error("PhoneController@deleteItl: Setting ITL Process to fail.  Checking if this was the " .
-                                    "first issued key command");
-                if($index == 0) {
+                    "first issued key command");
+                if ($index == 0) {
                     $this->remoteOperation->status = 'finished';
                     $this->remoteOperation->result = 'fail';
                     $this->remoteOperation->save();
@@ -163,7 +161,7 @@ class PhoneController
         Log::info('PhoneController@pushBackgroundImage: Starting pushBackgroundImage process');
 
         $fullImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/$image";
-        $thumbImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/" . basename($image,'.png') . "_thumb.png";
+        $thumbImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/" . basename($image, '.png') . "_thumb.png";
 
         $xml = "XML=<setBackground><background><image>$fullImage</image><icon>$thumbImage</icon></background></setBackground>";
         Log::info('PhoneController@pushBackgroundImage: Set XML body', [
@@ -172,7 +170,7 @@ class PhoneController
 
         Log::info('PhoneController@pushBackgroundImage: Sending HTTP request to phone');
         try {
-            $response = $this->client->post('CGI/Execute',['body' => $xml]);
+            $response = $this->client->post('CGI/Execute', ['body' => $xml]);
 
             Log::info("PhoneController@pushBackgroundImage: Received Guzzle HTTP Response from IP Phone - ", [
                 $response->getReasonPhrase(),
@@ -183,7 +181,6 @@ class PhoneController
             $this->remoteOperation->result = 'success';
             $this->remoteOperation->save();
             return true;
-
         } catch (RequestException $e) {
             if ($e->hasResponse()) {
                 Log::error("PhoneController@pushBackgroundImage: Received Guzzle HTTP Client Error - ", [
@@ -192,15 +189,22 @@ class PhoneController
                 ]);
                 $this->remoteOperation->fail_reason = $e->getResponse()->getBody();
             } else {
-                Log::error("PhoneController@pushBackgroundImage: Received Guzzle HTTP Client Timeout");
-                $this->remoteOperation->fail_reason = 'timeout';
+                if ($this->hasAlreadyTimedOut) {
+                    Log::error("PhoneController@pushBackgroundImage: Received second Guzzle HTTP Client Timeout.");
+                    $this->remoteOperation->fail_reason = 'timeout';
+                } else {
+                    Log::error("PhoneController@pushBackgroundImage: This is the first timeout in the request series.  We'll try it once more.");
+                    $this->hasAlreadyTimedOut = true;
+                    Log::error("PhoneController@pushBackgroundImage: Set hasAlreadyTimedOut to $this->hasAlreadyTimedOut.");
+                    $this->pushBackgroundImage($image);
+                }
             }
 
+            Log::error("PhoneController@pushBackgroundImage: Considering this try a fail.  Storing results.");
             $this->remoteOperation->status = 'finished';
             $this->remoteOperation->result = 'fail';
             $this->remoteOperation->save();
             return false;
-
         }
     }
 }
