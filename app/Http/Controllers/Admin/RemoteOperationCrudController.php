@@ -35,6 +35,14 @@ class RemoteOperationCrudController extends CrudController
         */
 
         // TODO: remove setFromDb() and manually define Fields and Columns
+        $this->crud->addColumn(
+            [
+                'name' => 'screenshot',
+                'label' => "Screen Shot",
+                'type' => 'view',
+                'view' => 'vendor.backpack.crud.columns.remoteOperations.screenshot',
+            ]
+        );
         $this->crud->setFromDb();
         $this->crud->addColumn(
             [

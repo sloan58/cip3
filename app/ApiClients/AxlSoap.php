@@ -114,6 +114,7 @@ class AxlSoap extends SoapClient
 
         Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Getting current associated phones");
         $phones = $this->buildAssociatedPhonesArray($phone);
+        dump($phones);
 
         Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Calling API to associate phones");
         try {
@@ -405,6 +406,9 @@ class AxlSoap extends SoapClient
 
             Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Removing duplicate Phone names");
             $phoneArray = array_unique($phoneArray);
+
+            Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Resetting array keys");
+            $phoneArray = array_values($phoneArray);
 
             Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Returning Phone array", [$phoneArray]);
             return $phoneArray;
