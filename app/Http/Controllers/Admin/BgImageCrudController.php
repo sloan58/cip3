@@ -44,6 +44,12 @@ class BgImageCrudController extends CrudController
 
         $this->crud->addColumns([
             [
+                'name' => 'image',
+                'label' => "Image Preview",
+                'type' => 'view',
+                'view' => 'vendor.backpack.crud.columns.bgImages.image',
+            ],
+            [
                 'name' => 'name',
                 'type' => 'text',
                 'label' => 'Name',
@@ -53,12 +59,6 @@ class BgImageCrudController extends CrudController
                 'type' => 'select_from_array',
                 'label' => 'Model',
                 'options' => $supportedModels
-            ],
-            [
-                'name' => 'image',
-                'label' => 'Image',
-                'type' => 'upload',
-                'upload' => true,
             ]
         ]);
 
