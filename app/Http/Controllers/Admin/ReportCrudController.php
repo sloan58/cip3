@@ -28,8 +28,8 @@ class ReportCrudController extends CrudController
         $this->crud->setEntityNameStrings('report', 'reports');
 
         // Custom Buttons
-        $this->crud->removeAllButtonsFromStack('line');
-        $this->crud->addButtonFromView('line', 'download', 'phone_report_download', 'end');
+        $this->crud->removeButtonFromStack('update', 'line');
+        $this->crud->addButtonFromView('line', 'download', 'phone_report_download', 'beginning');
 
         /*
         |--------------------------------------------------------------------------

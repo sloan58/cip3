@@ -109,7 +109,7 @@ class ProcessPhoneReportJob implements ShouldQueue
 
         Log::info('ProcessPhoneReportJob@handle: Creating CSV writer and storing file');
         $csvWriter = $csvExporter->getWriter();
-        Storage::put($this->report->filename, $csvWriter->getContent());
+        Storage::put('public/' . $this->report->filename, $csvWriter->getContent());
 
         Log::info('ProcessPhoneReportJob@handle: Job complete.  Updating Report object to "finished"');
         $this->report->status = "finished";

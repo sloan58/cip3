@@ -229,7 +229,7 @@ class RisPortSoap extends SoapClient
                     'StatusReason' => $data->StatusReason,
                     'Protocol' => $data->Protocol,
                     'NumOfLines' => $data->NumOfLines,
-                    'Lines' => $lines,
+                    'Lines' => $lines ?? '',
                     'ActiveLoadID' => $data->ActiveLoadID,
                     'InactiveLoadID' => $data->InactiveLoadID,
                     'DownloadStatus' => $data->DownloadStatus,

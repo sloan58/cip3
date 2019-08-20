@@ -6,11 +6,18 @@
     <a href="#"><i class="fa fa-phone"></i> <span>Phones</span> <i class="fa fa-angle-left pull-right"></i></a>
     <ul class="treeview-menu">
         <li><a href='{{ backpack_url('phone') }}'><span>Search</span></a></li>
-        <li><a href='{{ backpack_url('remote-operation') }}'><span>Action History</span></a></li>
+{{--        <li><a href='{{ backpack_url('remote-operation') }}'><span>Action History</span></a></li>--}}
         <li><a href='{{ backpack_url('report') }}'><span>Download Reports</span></a></li>
-        <li><a href='{{ backpack_url('bgimage') }}'><span>Background Images</span></a></li>
     </ul>
 </li>
+<li class="treeview">
+    <a href="#"><i class="fa fa-image"></i> <span>Background Images</span> <i class="fa fa-angle-left pull-right"></i></a>
+    <ul class="treeview-menu">
+        <li><a href='{{ backpack_url('bgimage') }}'><span>Images</span></a></li>
+        <li><a href='{{ backpack_url('bgimage-history') }}'><span>History</span></a></li>
+    </ul>
+</li>
+<li><a href='{{ backpack_url('itl-history') }}'><i class='fa fa-lock'></i> <span>ITL Delete History</span></a></li>
 <li><a href="{{ backpack_url('user') }}"><i class="fa fa-user"></i> <span>Users</span></a></li>
 <li><a href="{{ backpack_url('settings') }}"><i class="fa fa-gears"></i> <span>Settings</span></a></li>
 

@@ -4,6 +4,8 @@
 namespace App\ApiClients;
 
 
+use App\Models\BgImageHistory;
+use App\Models\ItlHistory;
 use App\Models\Phone;
 use Sabre\Xml\Reader;
 use GuzzleHttp\Client;
@@ -16,26 +18,20 @@ use GuzzleHttp\Exception\ConnectException;
 class PhoneController
 {
     /**
-     * @var RemoteOperation
-     */
-    private $remoteOperation;
-
-    /**
      * @var Phone
      */
     private $phone;
 
     /**
-     * @var hasAlreadyTimedOut
+     * Has a request already timed out once before
      */
     private $hasAlreadyTimedOut;
 
     /**
      * PhoneController constructor.
      * @param Phone $phone
-     * @param RemoteOperation $remoteOperation
      */
-    function __construct(Phone $phone, RemoteOperation $remoteOperation)
+    function __construct(Phone $phone)
     {
 
         $this->client = new Client([
@@ -54,13 +50,12 @@ class PhoneController
 
         $this->hasAlreadyTimedOut = false;
 
-        $this->remoteOperation = $remoteOperation;
         $this->phone = $phone;
 
         $this->reader = new Reader;
     }
 
-    public function deleteItl()
+    public function deleteItl(ItlHistory $itlHistory)
     {
         Log::info('PhoneController@deleteItl: Starting deleteItl process.');
         Log::info("PhoneController@deleteItl: Iterating keys for phone model {$this->phone->model}", [
@@ -106,10 +101,10 @@ class PhoneController
                     }
                     Log::error("PhoneController@deleteItl: Error message: ", [$errorType]);
                     Log::error("PhoneController@deleteItl: Setting ITL Process to fail");
-                    $this->remoteOperation->fail_reason = $errorType;
-                    $this->remoteOperation->status = 'finished';
-                    $this->remoteOperation->result = 'fail';
-                    $this->remoteOperation->save();
+                    $itlHistory->fail_reason = $errorType;
+                    $itlHistory->status = 'finished';
+                    $itlHistory->result = 'fail';
+                    $itlHistory->save();
 
                     return false;
                 }
@@ -122,46 +117,46 @@ class PhoneController
                  */
                 if ($e instanceof ClientException) {
                     //Unauthorized
-                    $this->remoteOperation->fail_reason = "Authentication Exception";
+                    $itlHistory->fail_reason = "Authentication Exception";
                 } elseif ($e instanceof ConnectException) {
                     //Can't Connect
-                    $this->remoteOperation->fail_reason = "Connection Exception";
+                    $itlHistory->fail_reason = "Connection Exception";
                 } else {
                     //Other exception
-                    $this->remoteOperation->fail_reason = "Unknown Exception: $e->getMessage()";
+                    $itlHistory->fail_reason = "Unknown Exception: $e->getMessage()";
                 }
 
                 Log::error("PhoneController@deleteItl: Setting ITL Process to fail.  Checking if this was the " .
                     "first issued key command");
                 if ($index == 0) {
-                    $this->remoteOperation->status = 'finished';
-                    $this->remoteOperation->result = 'fail';
-                    $this->remoteOperation->save();
+                    $itlHistory->status = 'finished';
+                    $itlHistory->result = 'fail';
+                    $itlHistory->save();
                     return false;
                 } else {
-                    $this->remoteOperation->fail_reason = 'Note: timed out after first key.';
-                    $this->remoteOperation->status = 'finished';
-                    $this->remoteOperation->result = 'success';
-                    $this->remoteOperation->save();
+                    $itlHistory->fail_reason = 'Note: timed out after first key.';
+                    $itlHistory->status = 'finished';
+                    $itlHistory->result = 'success';
+                    $itlHistory->save();
                     return true;
                 }
             }
         }
 
         Log::info("PhoneController@deleteItl: ITL Delete completed successfully");
-        $this->remoteOperation->status = 'finished';
-        $this->remoteOperation->result = 'success';
-        $this->remoteOperation->save();
+        $itlHistory->status = 'finished';
+        $itlHistory->result = 'success';
+        $itlHistory->save();
 
         return true;
     }
 
-    public function pushBackgroundImage($image)
+    public function pushBackgroundImage(BgImageHistory $bgImageHistory)
     {
         Log::info('PhoneController@pushBackgroundImage: Starting pushBackgroundImage process');
 
-        $fullImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/$image";
-        $thumbImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/" . basename($image, '.png') . "_thumb.png";
+        $fullImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/$bgImageHistory->image";
+        $thumbImage = env('APP_URL') . "/storage/backgrounds/{$this->phone->getFullSizeBgDimensions()}/" . basename($bgImageHistory->image, '.png') . "_thumb.png";
 
         $xml = "XML=<setBackground><background><image>$fullImage</image><icon>$thumbImage</icon></background></setBackground>";
         Log::info('PhoneController@pushBackgroundImage: Set XML body', [
@@ -177,11 +172,11 @@ class PhoneController
                 $xml
             ]);
 
-            $this->remoteOperation->status = 'finished';
-            $this->remoteOperation->result = 'success';
-            $this->remoteOperation->save();
+            $bgImageHistory->status = 'finished';
+            $bgImageHistory->result = 'success';
+            $bgImageHistory->save();
 
-            $this->savePhoneScreenShot();
+            $this->savePhoneScreenShot($bgImageHistory);
 
             Log::info('PhoneController@pushBackgroundImage: Push Background Image completed successfully!');
             return true;
@@ -191,36 +186,37 @@ class PhoneController
                     'Response' => $e->getResponse()->getBody(),
                     'Request' => $e->getRequest()->getBody()
                 ]);
-                $this->remoteOperation->fail_reason = $e->getResponse()->getBody();
+                $bgImageHistory->fail_reason = $e->getResponse()->getBody();
             } else {
                 if ($this->hasAlreadyTimedOut) {
                     Log::error("PhoneController@pushBackgroundImage: Received second Guzzle HTTP Client Timeout.");
-                    $this->remoteOperation->fail_reason = 'timeout';
+                    $bgImageHistory->fail_reason = 'timeout';
                 } else {
                     Log::error("PhoneController@pushBackgroundImage: This is the first timeout in the request series.  We'll try it once more.");
                     $this->hasAlreadyTimedOut = true;
                     Log::error("PhoneController@pushBackgroundImage: Set hasAlreadyTimedOut to $this->hasAlreadyTimedOut.");
-                    $this->pushBackgroundImage($image);
+                    $this->pushBackgroundImage($bgImageHistory->image);
                 }
             }
 
             Log::error("PhoneController@pushBackgroundImage: Considering this try a fail.  Storing results.");
-            $this->remoteOperation->status = 'finished';
-            $this->remoteOperation->result = 'fail';
-            $this->remoteOperation->save();
+            $bgImageHistory->status = 'finished';
+            $bgImageHistory->result = 'fail';
+            $bgImageHistory->save();
             return false;
         }
     }
 
     /**
      * Save a copy of the IP Phone screen shot after pushing a new image
+     * @param BgImageHistory $bgImageHistory
      */
-    private function savePhoneScreenShot()
+    private function savePhoneScreenShot(BgImageHistory $bgImageHistory)
     {
         Log::info('PhoneController@savePhoneScreenShot: Saving screen shot of the IP Phone');
         try {
             $response = $this->client->get('CGI/Screenshot', [
-                'sink' => storage_path("app/public/screenshots/{$this->remoteOperation->id}_{$this->phone->name}.png")
+                'sink' => storage_path("app/public/screenshots/{$bgImageHistory->id}_{$this->phone->name}.png")
                 ]);
 
             Log::info("PhoneController@savePhoneScreenShot: Received Guzzle HTTP Response from IP Phone - ", [

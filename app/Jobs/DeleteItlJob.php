@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\ApiClients\AxlSoap;
 use SoapFault;
 use App\Models\Phone;
-use App\Models\RemoteOperation;
+use App\Models\ItlHistory;
+use App\ApiClients\AxlSoap;
 use Illuminate\Bus\Queueable;
 use App\ApiClients\RisPortSoap;
 use App\ApiClients\PhoneController;
@@ -64,10 +64,9 @@ class DeleteItlJob implements ShouldQueue
         );
 
         Log::info('DeleteItlJob@handle: Creating RemoteOperation object');
-        $remoteOperation = new RemoteOperation;
-        $remoteOperation->type = 'itl-delete';
-        $remoteOperation->phone = $this->phone->name;
-        $remoteOperation->requested_by = $this->requestedBy;
+        $itlHistory = new ItlHistory;
+        $itlHistory->phone = $this->phone->name;
+        $itlHistory->requested_by = $this->requestedBy;
 
         Log::info('DeleteItlJob@handle: Pulling latest realtime information for this phone');
         $ris = new RisPortSoap($this->phone->ucm, false);
@@ -79,22 +78,22 @@ class DeleteItlJob implements ShouldQueue
                 ['Status' => $this->phone->status, 'IPAddress' => $this->phone->currentIpAddress()]
             );
 
-            $remoteOperation->status = 'finished';
-            $remoteOperation->result = 'fail';
-            $remoteOperation->fail_reason = !$this->phone->isRegistered() ? 'Phone not registered' : 'No known IP Address';
-            $remoteOperation->save();
+            $itlHistory->status = 'finished';
+            $itlHistory->result = 'fail';
+            $itlHistory->fail_reason = !$this->phone->isRegistered() ? 'Phone not registered' : 'No known IP Address';
+            $itlHistory->save();
             exit;
         }
 
         Log::info('DeleteItlJob@handle: Phone is registered and has an IP Address');
-        $remoteOperation->ip_address = $this->phone->currentIpAddress();
+        $itlHistory->ip_address = $this->phone->currentIpAddress();
 
         Log::info('DeleteItlJob@handle: Checking if phone supports ITL delete');
         if(!$this->phone->itl) {
-            $remoteOperation->status = 'finished';
-            $remoteOperation->result = 'fail';
-            $remoteOperation->fail_reason = 'Unsupported Model';
-            $remoteOperation->save();
+            $itlHistory->status = 'finished';
+            $itlHistory->result = 'fail';
+            $itlHistory->fail_reason = 'Unsupported Model';
+            $itlHistory->save();
             exit;
         }
 
@@ -104,19 +103,17 @@ class DeleteItlJob implements ShouldQueue
 
         if(!$associated) {
             Log::error('DeleteItlJob@handle: Problem associating IP Phone with AXL User.  Failing ITL Delete');
-            $remoteOperation->status = 'finished';
-            $remoteOperation->result = 'fail';
-            $remoteOperation->fail_reason = 'Could not associated AXL User';
-            $remoteOperation->save();
+            $itlHistory->status = 'finished';
+            $itlHistory->result = 'fail';
+            $itlHistory->fail_reason = 'Could not associated AXL User';
+            $itlHistory->save();
             exit;
         }
 
         Log::info('DeleteItlJob@handle: Associated IP Phone with AXL User successfully');
 
         Log::info('DeleteItlJob@handle: Calling the PhoneController@deleteItl');
-        $phoneController = new PhoneController($this->phone, $remoteOperation);
-
-        $phoneController->deleteItl();
+        (new PhoneController($this->phone))->deleteItl($itlHistory);
 
     }
 }

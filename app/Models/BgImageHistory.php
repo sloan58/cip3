@@ -5,7 +5,7 @@ namespace App\Models;
 use Backpack\CRUD\CrudTrait;
 use Illuminate\Database\Eloquent\Model;
 
-class BgImage extends Model
+class BgImageHistory extends Model
 {
     use CrudTrait;
 
@@ -15,12 +15,8 @@ class BgImage extends Model
     |--------------------------------------------------------------------------
     */
 
-    protected $table = 'bg_images';
-    protected $fillable = [
-        'name',
-        'dimensions',
-        'image'
-    ];
+    protected $table = 'bg_image_histories';
+    protected $guarded = [];
 
     /*
     |--------------------------------------------------------------------------

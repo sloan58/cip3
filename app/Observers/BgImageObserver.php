@@ -37,11 +37,16 @@ class BgImageObserver
      */
     public function deleted(BgImage $bgImage)
     {
-        \Log::info('observer fired');
+        \Log::info('BgImageObserver@deleted: Fired');
+        \Log::info('BgImageObserver@deleted: Deleting images from disk');
         $thumbnailImageName = sprintf(
             "%s_thumb.png",
             basename($bgImage->image, '.png')
         );
+
+        \Log::info('BgImageObserver@deleted: Deleting images: ', [
+            $bgImage->image, $thumbnailImageName
+        ]);
 
         foreach([$bgImage->image, $thumbnailImageName] as $file) {
             Storage::delete(
@@ -51,6 +56,8 @@ class BgImageObserver
                 )
             );
         }
+
+        \Log::info('BgImageObserver@deleted: Images deleted');
     }
 
     /**

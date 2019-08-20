@@ -5,16 +5,16 @@ namespace App\Http\Controllers\Admin;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 
 // VALIDATION: change the requests to match your own file names if you need form validation
-use App\Http\Requests\EraserRequest as StoreRequest;
-use App\Http\Requests\EraserRequest as UpdateRequest;
+use App\Http\Requests\BgImageHistoryRequest as StoreRequest;
+use App\Http\Requests\BgImageHistoryRequest as UpdateRequest;
 use Backpack\CRUD\CrudPanel;
 
 /**
- * Class RemoteOperationCrudController
+ * Class BgImageHistoryCrudController
  * @package App\Http\Controllers\Admin
  * @property-read CrudPanel $crud
  */
-class RemoteOperationCrudController extends CrudController
+class BgImageHistoryCrudController extends CrudController
 {
     public function setup()
     {
@@ -23,10 +23,9 @@ class RemoteOperationCrudController extends CrudController
         | CrudPanel Basic Information
         |--------------------------------------------------------------------------
         */
-        $this->crud->setModel('App\Models\RemoteOperation');
-        $this->crud->setRoute(config('backpack.base.route_prefix') . '/remote-operation');
-        $this->crud->setEntityNameStrings('Action History', 'Action Histories');
-        $this->crud->orderBy('updated_at', 'DESC');
+        $this->crud->setModel('App\Models\BgImageHistory');
+        $this->crud->setRoute(config('backpack.base.route_prefix') . '/bgimage-history');
+        $this->crud->setEntityNameStrings('Background Push History', 'Background Push Histories');
 
         /*
         |--------------------------------------------------------------------------
@@ -40,7 +39,7 @@ class RemoteOperationCrudController extends CrudController
                 'name' => 'screenshot',
                 'label' => "Screen Shot",
                 'type' => 'view',
-                'view' => 'vendor.backpack.crud.columns.remoteOperations.screenshot',
+                'view' => 'vendor.backpack.crud.columns.bgImageHistories.screenshot',
             ]
         );
         $this->crud->setFromDb();
@@ -53,10 +52,10 @@ class RemoteOperationCrudController extends CrudController
             ]
         );
 
-        // Remove buttons.  This CRUD is read only
-        $this->crud->removeAllButtons();
+        // Remove buttons
+        $this->crud->removeButtonFromStack('update', 'line');
 
-        // add asterisk for fields that are required in EraserRequest
+        // add asterisk for fields that are required in BgImageHistoryRequest
         $this->crud->setRequiredFields(StoreRequest::class, 'create');
         $this->crud->setRequiredFields(UpdateRequest::class, 'edit');
     }
