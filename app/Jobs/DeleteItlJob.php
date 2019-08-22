@@ -63,7 +63,7 @@ class DeleteItlJob implements ShouldQueue
             [$this->phone->name]
         );
 
-        Log::info('DeleteItlJob@handle: Creating RemoteOperation object');
+        Log::info('DeleteItlJob@handle: Creating Itl History object');
         $itlHistory = new ItlHistory;
         $itlHistory->phone = $this->phone->name;
         $itlHistory->requested_by = $this->requestedBy;

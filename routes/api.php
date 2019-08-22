@@ -21,7 +21,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // Get the supported image files for a particular phone model
 Route::get('/phone-images/{phone}', function(Phone $phone) {
-    $images = $phone->bgImages;
+    $images = $phone->assignedBgImages();
     return response([
         'images' => $images
     ], 200);

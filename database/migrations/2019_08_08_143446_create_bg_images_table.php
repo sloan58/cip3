@@ -18,6 +18,7 @@ class CreateBgImagesTable extends Migration
             $table->string('name');
             $table->string('image');
             $table->string('dimensions');
+            $table->json('device_pools')->nullable();
             $table->timestamps();
         });
     }

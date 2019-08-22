@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use Backpack\CRUD\CrudPanel;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\BgImageRequest as StoreRequest;
 use App\Http\Requests\BgImageRequest as UpdateRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
-use Illuminate\Support\Facades\Log;
 
 // VALIDATION: change the requests to match your own file names if you need form validation
 
@@ -59,7 +59,12 @@ class BgImageCrudController extends CrudController
                 'type' => 'select_from_array',
                 'label' => 'Model',
                 'options' => $supportedModels
-            ]
+            ],
+            [
+                'name' => 'device_pools', // The db column name
+                'label' => "Device Pools", // Table column heading
+                'type' => 'array'
+            ],
         ]);
 
         $this->crud->addFields([
@@ -85,10 +90,16 @@ class BgImageCrudController extends CrudController
                 'label' => 'Thumbnail Image',
                 'type' => 'upload',
                 'upload' => true,
-            ]
+            ],
+            [
+                'name' => 'device_pools',
+                'label' => "Device Pools",
+                'type' => 'select2_from_array',
+                'options' => \App\Models\BgImage::availableDevicePools(),
+                'allows_null' => false,
+                 'allows_multiple' => true, // OPTIONAL; needs you to cast this to array in your model;
+            ],
         ]);
-
-        $this->crud->removeButtonFromStack('update', 'line');
 
         // add asterisk for fields that are required in BgImageRequest
         $this->crud->setRequiredFields(StoreRequest::class, 'create');
@@ -120,6 +131,12 @@ class BgImageCrudController extends CrudController
         $request->request->add(['image' => $fullImageName]);
         Log::info("BgImageCrudController@store: Added `image` request param");
 
+        Log::info("BgImageCrudController@store: Adding Device Pools to device_pools");
+        if(in_array('All', $request->get('device_pools'))) {
+            $request->request->remove('device_pools');
+            $request->request->add(['device_pools' => ['All']]);
+        }
+
         Log::info("BgImageCrudController@store: Handing off to Backpack to store model");
         // your additional operations before save here
         $redirect_location = parent::storeCrud($request);
@@ -130,6 +147,41 @@ class BgImageCrudController extends CrudController
 
     public function update(UpdateRequest $request)
     {
+        // TODO: Fix issue with moving files when one exists with the same name
+
+        if($request->has('full_image')) {
+            Log::info("BgImageCrudController@update: Request is updating image files");
+
+            $dimensions = $request->dimensions;
+            Log::info("BgImageCrudController@update: Set dimensions to $dimensions");
+
+            $fullImageName = str_replace(' ', '', $request->file('full_image')->getClientOriginalName());
+            Log::info("BgImageCrudController@update: Set full image name to $fullImageName");
+
+            $outFile = $request->file('full_image')->storeAs("backgrounds/$dimensions", $fullImageName, 'public');
+            Log::info("BgImageCrudController@update: $fullImageName stored to $outFile");
+
+            $thumbnailImageName = sprintf(
+                "%s_thumb.png",
+                basename($fullImageName, '.png')
+            );
+            Log::info("BgImageCrudController@update: Set thumbnail image name to $thumbnailImageName");
+
+            $outFile = $request->file('thumbnail_image')->storeAs("backgrounds/$dimensions", $thumbnailImageName, 'public');
+            Log::info("BgImageCrudController@update: $thumbnailImageName stored to $outFile");
+
+            $request->request->add(['image' => $fullImageName]);
+            Log::info("BgImageCrudController@update: Added `image` request param");
+
+            Log::info("BgImageCrudController@update: Handing off to Backpack to update model");
+        }
+
+        Log::info("BgImageCrudController@update: Adding Device Pools to device_pools");
+        if(in_array('All', $request->get('device_pools'))) {
+            $request->request->remove('device_pools');
+            $request->request->add(['device_pools' => ['All']]);
+        }
+
         // your additional operations before save here
         $redirect_location = parent::updateCrud($request);
         // your additional operations after save here

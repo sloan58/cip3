@@ -1,10 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
-
-// composer require laracasts/testdummy
 use Illuminate\Support\Facades\File;
-use Laracasts\TestDummy\Factory as TestDummy;
 
 class PublicFolderSeederTableSeeder extends Seeder
 {

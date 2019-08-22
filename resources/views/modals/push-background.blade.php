@@ -51,10 +51,16 @@
 
                         // Build the select list
                         response.json().then(function(data) {
-                            $('select[name="image"]')
-                                .html( data.images.map(function(image) {
-                                    return `<option value="${image.id}">${image.name}</option>`;
-                                }));
+                            if(data.images.length) {
+                                console.log('yo yo');
+                                $('select[name="image"]')
+                                    .html( data.images.map(function(image) {
+                                        return `<option value="${image.id}">${image.name}</option>`;
+                                    }));
+                            } else {
+                                $('select[name="image"]')
+                                    .html(`<option value="none">No Images Available For This Phone</option>`);
+                            }
                         });
                     }
                 )

@@ -31,7 +31,6 @@ Route::group([
     // Report Routes
     CRUD::resource('report', 'ReportCrudController');
 
-    CRUD::resource('remote-operation', 'RemoteOperationCrudController');
     CRUD::resource('bgimage-history', 'BgImageHistoryCrudController');
     CRUD::resource('itl-history', 'ItlHistoryCrudController');
 }); // this should be the absolute last line of this file

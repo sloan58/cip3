@@ -8,7 +8,6 @@ use App\Models\Phone;
 use App\ApiClients\AxlSoap;
 use Illuminate\Bus\Queueable;
 use App\ApiClients\RisPortSoap;
-use App\Models\RemoteOperation;
 use App\ApiClients\PhoneController;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
@@ -71,7 +70,7 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
             [$this->phone->name]
         );
 
-        Log::info('PushPhoneBackgroundImageJob@handle: Creating RemoteOperation object');
+        Log::info('PushPhoneBackgroundImageJob@handle: Creating BgImageHistory object');
         $bgImageHistory = new BgImageHistory;
         $bgImageHistory->image = $this->image;
         $bgImageHistory->phone = $this->phone->name;

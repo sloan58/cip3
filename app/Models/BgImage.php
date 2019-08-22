@@ -19,7 +19,12 @@ class BgImage extends Model
     protected $fillable = [
         'name',
         'dimensions',
-        'image'
+        'image',
+        'device_pools'
+    ];
+
+    protected $casts = [
+        'device_pools' => 'array'
     ];
 
     /*
@@ -28,6 +33,20 @@ class BgImage extends Model
     |--------------------------------------------------------------------------
     */
 
+    /**
+     * Get the available Device Pools to associate with the BgImage
+     * @return array
+     */
+    public static function availableDevicePools()
+    {
+        $devicePools = \App\Models\Phone::distinct('device_pool')->pluck('device_pool')->toArray();
+        array_unshift($devicePools, 'All');
+        $devicePools = array_map(function($devicePool) {
+            return [$devicePool => $devicePool];
+        }, $devicePools);
+        $devicePools = array_merge(...$devicePools);
+        return $devicePools;
+    }
     /*
     |--------------------------------------------------------------------------
     | RELATIONS

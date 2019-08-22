@@ -25,12 +25,23 @@ class BgImageRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-             'name' => 'required|min:5|max:255',
-             'dimensions' => 'required',
-             'full_image' => 'required|image|mimes:png',
-             'thumbnail_image' => 'required|image|mimes:png'
-        ];
+        if ($this->isMethod('POST')) {
+            return [
+                'name' => 'required|min:5|max:255',
+                'dimensions' => 'required',
+                'full_image' => 'required|image|mimes:png',
+                'thumbnail_image' => 'required|image|mimes:png',
+                'device_pools' => 'required'
+            ];
+        } else {
+            return [
+                'name' => 'required|min:5|max:255',
+                'dimensions' => 'required',
+                'full_image' => 'required_if:thumbnail_image,1|image|mimes:png',
+                'thumbnail_image' => 'required_if:full_image,1|image|mimes:png',
+                'device_pools' => 'required'
+            ];
+        }
     }
 
     /**

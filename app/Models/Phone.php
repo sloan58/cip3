@@ -101,6 +101,19 @@ class Phone extends Model
         return $bgid ? $bgid->thumb : null;
     }
 
+    /**
+     * Get BgImages that are the right dimensions and assigned
+     * to either the phone's device pool or All device pools
+     *
+     * @return mixed
+     */
+    public function assignedBgImages()
+    {
+        return $this->bgImages->filter(function($image) {
+            return in_array($this->device_pool, $image->device_pools) || $image->device_pools[0] == "All" ? true: false;
+        });
+    }
+
     /*
     |--------------------------------------------------------------------------
     | RELATIONS
@@ -128,13 +141,23 @@ class Phone extends Model
     }
 
     /**
-     *  A Phone Has Many RemoteOperation events
+     *  A Phone Has Many BgImage History events
      *
      * @return HasMany
      */
-    public function erasers()
+    public function bgImageHistories()
     {
-        return $this->hasMany(RemoteOperation::class, 'name', 'phone');
+        return $this->hasMany(BgImageHistory::class, 'name', 'phone');
+    }
+
+    /**
+     *  A Phone Has Many ITL History events
+     *
+     * @return HasMany
+     */
+    public function itlHistories()
+    {
+        return $this->hasMany(ItlHistory::class, 'name', 'phone');
     }
 
     /**
