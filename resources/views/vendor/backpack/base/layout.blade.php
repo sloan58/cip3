@@ -2,7 +2,7 @@
 <html lang="{{ app()->getLocale() }}">
 <head>
 {{--    @include('backpack::inc.head')--}}
-    @include('inc.head')
+    @include('vendor.backpack.base.inc.head')
 </head>
 <body class="hold-transition {{ config('backpack.base.skin') }} sidebar-mini">
 <script type="text/javascript">
@@ -34,9 +34,9 @@
     <!-- Main content -->
         <section class="content">
 
-            @include('modals.bulk-delete-itl')
-            @include('modals.push-background')
-            @include('modals.export-phones', ['ucms' => \App\Models\Ucm::select('name')->get()])
+            @include('vendor.modals.bulk-delete-itl')
+            @include('vendor.modals.push-background')
+            @include('vendor.modals.export-phones', ['ucms' => \App\Models\Ucm::select('name')->get()])
 
             @yield('content')
 

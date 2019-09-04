@@ -36,7 +36,7 @@ class DashboardController extends Controller
 
         $unKnownCounts = $this->buildUnKnownPhoneCountChart();
 
-        return view('dashboard', compact(
+        return view('vendor.dashboard', compact(
             'phoneModels',
             'clusterCounts',
             'regCounts',
