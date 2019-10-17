@@ -69,6 +69,11 @@ class PhoneCrudController extends CrudController
                 'label' => 'Device Pool',
             ],
             [
+                'name' => 'owner_user_name',
+                'type' => 'text',
+                'label' => 'Owner',
+            ],
+            [
                 'name' => 'Call Manager',
                 'type' => 'select',
                 'entity' => 'ucm',
