@@ -74,6 +74,11 @@ class PhoneCrudController extends CrudController
                 'label' => 'Owner',
             ],
             [
+                'name' => 'ip_address',
+                'type' => 'text',
+                'label' => 'Current IP Address',
+            ],
+            [
                 'name' => 'Call Manager',
                 'type' => 'select',
                 'entity' => 'ucm',

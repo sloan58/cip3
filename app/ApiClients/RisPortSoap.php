@@ -40,7 +40,8 @@ class RisPortSoap extends SoapClient
 
         $wsdl = "https://{$this->ucm->ip_address}:8443/realtimeservice2/services/RISService70?wsdl";
 
-        parent::__construct($wsdl,
+        parent::__construct(
+            $wsdl,
             [
                 'trace' => true,
                 'exceptions' => true,
@@ -79,12 +80,12 @@ class RisPortSoap extends SoapClient
         Log::info("RisPortSoap@collectRealtimeData ({$this->ucm->name}): Total iterations is $totalIterations");
 
         Log::info("RisPortSoap@collectRealtimeData ({$this->ucm->name}): Calling RisPort API in 1k chunks");
-        foreach(array_chunk($this->phones, 1000) as $loop => $chunk) {
+        foreach (array_chunk($this->phones, 1000) as $loop => $chunk) {
             Log::info(
                 "RisPortSoap@collectRealtimeData ({$this->ucm->name}): Processing loop " . ($loop + 1) . " of $totalIterations"
             );
             $realtimeData = $this->queryRisPort($chunk);
-            if($realtimeData) {
+            if ($realtimeData) {
                 $this->storeRealtimeData($realtimeData);
             }
         }
@@ -105,57 +106,56 @@ class RisPortSoap extends SoapClient
             $response = $this->SelectCmDeviceExt([
                 'StateInfo' => '',
                 'CmSelectionCriteria' => [
-                    'MaxReturnedDevices'=>'1000',
-                    'DeviceClass'=>'Phone',
-                    'Model'=>'255',
-                    'Status'=>'Any',
-                    'NodeName'=>'',
-                    'SelectBy'=>'Name',
-                    'SelectItems'=>
-                        $phones
-                ]]);
+                    'MaxReturnedDevices' => '1000',
+                    'DeviceClass' => 'Phone',
+                    'Model' => '255',
+                    'Status' => 'Any',
+                    'NodeName' => '',
+                    'SelectBy' => 'Name',
+                    'SelectItems' =>
+                    $phones
+                ]
+            ]);
 
             Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): Received successful response");
 
-            Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): " .
-                              "Checking to see if there is any RisPort data available for devices"
+            Log::info(
+                "RisPortSoap@queryRisPort ({$this->ucm->name}): " .
+                    "Checking to see if there is any RisPort data available for devices"
             );
 
-            if(!$response->selectCmDeviceReturn->SelectCmDeviceResult->TotalDevicesFound)
-            {
+            if (!$response->selectCmDeviceReturn->SelectCmDeviceResult->TotalDevicesFound) {
                 Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): No device data available to process.");
                 return false;
             }
 
             Log::info("RisPortSoap@queryRisPort ({$this->ucm->name}): Device data is available.");
             $realtimeData = is_array($response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item) ?
-                            $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item :
-                            [$response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item];
+                $response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item : [$response->selectCmDeviceReturn->SelectCmDeviceResult->CmNodes->item];
             return $realtimeData;
-
         } catch (SoapFault $e) {
             Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): Received Error Response", [
-                [ 'faultstring' => $e->faultstring ],
-                [ 'message' => $e->getMessage() ],
-                [ 'last request' => $this->__getLastRequest() ],
-                [ 'last response' => $this->__getLastResponse() ],
-                [ 'last request headers' => $this->__getLastRequestHeaders() ]
+                ['faultstring' => $e->faultstring],
+                ['message' => $e->getMessage()],
+                ['last request' => $this->__getLastRequest()],
+                ['last response' => $this->__getLastResponse()],
+                ['last request headers' => $this->__getLastRequestHeaders()]
             ]);
 
             // The typo in the error message below is intended.  It's what gets sent in the response from UCM :-)
-            if (preg_match('/^AxisFault: Exceeded allowed rate for Reatime information/',$e->faultstring))
-            {
-                Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): Error was a throttle response.  " .
-                                   "Sleeping 30 seconds"
+            if (preg_match('/^AxisFault: Exceeded allowed rate for Reatime information/', $e->faultstring)) {
+                Log::error(
+                    "RisPortSoap@queryRisPort ({$this->ucm->name}): Error was a throttle response.  " .
+                        "Sleeping 30 seconds"
                 );
                 sleep(30);
                 $this->queryRisPort($phones);
             }
             Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): Error was not a throttle response.  Exiting");
 
-            if($this->isFullSync) {
+            if ($this->isFullSync) {
                 Log::error("RisPortSoap@queryRisPort ({$this->ucm->name}): This was a full sync.  " .
-                                    "Updating DB and checking Teams notification settings");
+                    "Updating DB and checking Teams notification settings");
 
                 $this->ucm->updateSyncHistory(
                     'Failed',
@@ -166,7 +166,7 @@ class RisPortSoap extends SoapClient
                 $this->ucm->sync_in_progress = false;
                 $this->ucm->save();
 
-                if(setting('teams_enable_notifications')) {
+                if (setting('teams_enable_notifications')) {
 
                     Log::info(
                         "RisPortSoap@queryRisPort ({$this->ucm->name}): Webex Teams notifications enabled.  
@@ -193,9 +193,9 @@ class RisPortSoap extends SoapClient
     private function storeRealtimeData($realtimeData)
     {
         Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing Realtime Data locally");
-        foreach($realtimeData as $cmNode) {
+        foreach ($realtimeData as $cmNode) {
 
-            if(!$cmNode->CmDevices) {
+            if (!$cmNode->CmDevices) {
                 Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): $cmNode->Name has no registered devices");
                 continue;
             }
@@ -204,10 +204,10 @@ class RisPortSoap extends SoapClient
             $devices = is_array($cmNode->CmDevices->item) ? $cmNode->CmDevices->item : [$cmNode->CmDevices->item];
 
             Log::info("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Iterating devices");
-            foreach($devices as $data) {
-                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Processing item", [ $data ]);
+            foreach ($devices as $data) {
+                Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Processing item", [$data]);
 
-                if(!isset($data->Name)) continue;
+                if (!isset($data->Name)) continue;
 
                 $phone = Phone::where([
                     'name' => $data->Name,
@@ -217,8 +217,8 @@ class RisPortSoap extends SoapClient
                     'phoneId' => $phone->id
                 ]);
 
-                if(isset($data->LinesStatus->item)) {
-                    $lines = array_map(function($line) {
+                if (isset($data->LinesStatus->item)) {
+                    $lines = array_map(function ($line) {
                         return $line->DirectoryNumber;
                     }, is_array($data->LinesStatus->item) ? $data->LinesStatus->item : [$data->LinesStatus->item]);
                 }
@@ -243,7 +243,7 @@ class RisPortSoap extends SoapClient
                     'currentStatus' => $currentStatus
                 ]);
 
-                if($phone->realtime_data) {
+                if ($phone->realtime_data) {
                     $statuses = $phone->realtime_data;
                     Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Adding new status to DB ", [
                         'statuses_before' => $statuses,
@@ -256,14 +256,16 @@ class RisPortSoap extends SoapClient
 
                     ]);
                 } else {
-                    Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): DB status is empty.  " .
-                        "Adding current status"
+                    Log::debug(
+                        "RisPortSoap@storeRealtimeData ({$this->ucm->name}): DB status is empty.  " .
+                            "Adding current status"
                     );
                     $phone->realtime_data = [$currentStatus];
                 }
 
                 Log::debug("RisPortSoap@storeRealtimeData ({$this->ucm->name}): Storing phone data");
                 $phone->status = $currentStatus['Status'];
+                $phone->ip_address = $currentStatus['IPAddress'];
                 $phone->save();
             }
         }
@@ -276,7 +278,7 @@ class RisPortSoap extends SoapClient
     private function buildRisPortPhoneArray($phones): void
     {
         Log::info("RisPortSoap@buildRisPortPhoneArray ({$this->ucm->name}): Building RisPort Item array");
-        foreach ((array)$phones as $phone) {
+        foreach ((array) $phones as $phone) {
             array_push($this->phones, ['Item' => $phone]);
         }
         Log::info("RisPortSoap@buildRisPortPhoneArray ({$this->ucm->name}): Set RisPhoneArray - ", [
