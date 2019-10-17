@@ -63,7 +63,8 @@ class AxlSoap extends SoapClient
 
         $this->skip = 0;
 
-        parent::__construct($wsdl,
+        parent::__construct(
+            $wsdl,
             [
                 'trace' => true,
                 'exceptions' => true,
@@ -96,7 +97,6 @@ class AxlSoap extends SoapClient
             ]);
 
             return true;
-
         } catch (SoapFault $e) {
 
             Log::error("AxlSoap@ping ({$this->ucm->name}): UCM Ping fail", [
@@ -110,7 +110,7 @@ class AxlSoap extends SoapClient
     public function associatePhoneWithAppUser($phone)
     {
         Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Associating IP Phone {$phone->name} " .
-                          "with Application User {$phone->ucm->username}");
+            "with Application User {$phone->ucm->username}");
 
         Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Getting current associated phones");
         $phones = $this->buildAssociatedPhonesArray($phone);
@@ -131,8 +131,7 @@ class AxlSoap extends SoapClient
             ]);
 
             return true;
-
-        } catch(SoapFault $e) {
+        } catch (SoapFault $e) {
             Log::error("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Received unsuccessful response", [
                 $e->getMessage()
             ]);
@@ -156,10 +155,11 @@ class AxlSoap extends SoapClient
                 'name' => '',
                 'description' => '',
                 'model' => '',
-                'devicePoolName' => ''
+                'devicePoolName' => '',
+                'ownerUserName' => ''
             ]
         ];
-        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set listPhoneObject ", [ $listPhoneObject ]);
+        Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set listPhoneObject ", [$listPhoneObject]);
 
         Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Checking for throttle scenario", [
             'throttle' => $this->chunk
@@ -172,7 +172,7 @@ class AxlSoap extends SoapClient
                 'skip' => $this->skip,
                 'first' => $this->suggestedRows
             ]);
-            Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Updated listPhoneObject ", [ $listPhoneObject ]);
+            Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Updated listPhoneObject ", [$listPhoneObject]);
         }
 
         Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Calling listPhone API");
@@ -182,17 +182,16 @@ class AxlSoap extends SoapClient
             if (isset($res->return->phone)) {
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Response has interesting data");
 
-                $iterate = is_array($res->return->phone) ? $res->return->phone : [ $res->return->phone ];
+                $iterate = is_array($res->return->phone) ? $res->return->phone : [$res->return->phone];
 
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set IP Phone array to store locally");
-                Log::debug("AxlSoap@syncPhones ({$this->ucm->name}): ListPhone response objects", [ $iterate ]);
+                Log::debug("AxlSoap@syncPhones ({$this->ucm->name}): ListPhone response objects", [$iterate]);
 
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Calling storePhoneData method");
                 $this->storePhoneData($iterate);
             }
 
             return true;
-
         } catch (SoapFault $e) {
             if (preg_match('/Query request too large/', $e->faultstring)) {
 
@@ -213,22 +212,25 @@ class AxlSoap extends SoapClient
 
                 $this->suggestedRows = floor($matches[0][1] / 10);
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Suggested rows is {$matches[0][1]}");
-                Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Set limit to $this->suggestedRows (1/10th) " .
-                    "to avoid a recursive throttle."
+                Log::info(
+                    "AxlSoap@syncPhones ({$this->ucm->name}): Set limit to $this->suggestedRows (1/10th) " .
+                        "to avoid a recursive throttle."
                 );
 
-                $this->iterations =  floor($this->totalRows / $this->suggestedRows) +1;
+                $this->iterations =  floor($this->totalRows / $this->suggestedRows) + 1;
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Iterations is $this->iterations");
 
                 Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Skip set to $this->skip");
                 for ($this->loop = 1; $this->loop <= $this->iterations; $this->loop++) {
-                    Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Querying AXL listPhones.  " .
-                        "Iteration is $this->loop out of $this->iterations"
+                    Log::info(
+                        "AxlSoap@syncPhones ({$this->ucm->name}): Querying AXL listPhones.  " .
+                            "Iteration is $this->loop out of $this->iterations"
                     );
                     $this->syncPhones();
                     $this->skip = $this->skip + $this->suggestedRows;
-                    Log::info("AxlSoap@syncPhones ({$this->ucm->name}): Processed throttle iteration.  " .
-                        "Setting skip to $this->skip"
+                    Log::info(
+                        "AxlSoap@syncPhones ({$this->ucm->name}): Processed throttle iteration.  " .
+                            "Setting skip to $this->skip"
                     );
                 }
                 $this->resetThrottle();
@@ -256,7 +258,7 @@ class AxlSoap extends SoapClient
                 $this->ucm->save();
 
 
-                if(setting('teams_enable_notifications')) {
+                if (setting('teams_enable_notifications')) {
 
                     Log::info(
                         "AxlSoap@syncPhones ({$this->ucm->name}): Webex Teams notifications enabled.  Sending error message now."
@@ -304,8 +306,9 @@ class AxlSoap extends SoapClient
             );
 
             $phone->description = $item->description;
-            $phone->model= $item->model;
-            $phone->device_pool= $item->devicePoolName->_;
+            $phone->model = $item->model;
+            $phone->device_pool = $item->devicePoolName->_;
+            $phone->owner_user_name = isset($item->ownerUserName) ? $item->ownerUserName->_ : null;
             $phone->save();
 
             Log::debug("AxlSoap@storePhoneData ({$this->ucm->name}): Stored Item", [
@@ -318,7 +321,7 @@ class AxlSoap extends SoapClient
     public function supportsBackgroundApi(Phone $phone)
     {
         Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Checking if device settings allow the " .
-                          "remote operation to set background images");
+            "remote operation to set background images");
         try {
             $res = $this->getPhone([
                 'name' => $phone->name,
@@ -342,7 +345,7 @@ class AxlSoap extends SoapClient
             Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Checking firmware version");
             $segments = preg_split('/\s|\.|\-/', $loadInfo);
 
-            if($segments[1] < 9 || ($segments[1] == 9 && $segments[2] < 1)) {
+            if ($segments[1] < 9 || ($segments[1] == 9 && $segments[2] < 1)) {
                 Log::error("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Phone firmware is not supported for this action");
                 return [
                     'success' => false,
@@ -353,7 +356,7 @@ class AxlSoap extends SoapClient
 
 
             Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Checking phone personalization setting");
-            if($phonePersonalization != "Enabled") {
+            if ($phonePersonalization != "Enabled") {
                 Log::error("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Phone personalization is not enabled");
                 return [
                     'success' => false,
@@ -365,7 +368,6 @@ class AxlSoap extends SoapClient
             return [
                 'success' => true
             ];
-
         } catch (\SoapFault $e) {
             Log::error("PushBackgroundImage ({$this->phone->name}): Received AXL Soap Fault", [$e->faultstring, $e->getMessage()]);
             return [
@@ -396,12 +398,12 @@ class AxlSoap extends SoapClient
 
             if (!isset($res->return->appUser->associatedDevices->device)) {
                 Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): No Phones currently associated" .
-                                   " to this user.  Returning the input Phone $phone->name");
+                    " to this user.  Returning the input Phone $phone->name");
                 return $phoneArray;
             }
 
             Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Merging associated Phones and" .
-                              " new phone $phone->name", [$res->return->appUser->associatedDevices->device]);
+                " new phone $phone->name", [$res->return->appUser->associatedDevices->device]);
             $phoneArray = array_merge($phoneArray, (array) $res->return->appUser->associatedDevices->device);
 
             Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Removing duplicate Phone names");
@@ -412,8 +414,7 @@ class AxlSoap extends SoapClient
 
             Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Returning Phone array", [$phoneArray]);
             return $phoneArray;
-
-        } catch(SoapFault $e) {
+        } catch (SoapFault $e) {
             Log::error("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Received unsuccessful response", [
                 $e->getMessage()
             ]);
