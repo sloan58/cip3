@@ -39,7 +39,8 @@ class BgImageCrudController extends CrudController
             '320x212' => 'Cisco 7971 | Cisco 7970 | Cisco 7965 | Cisco 7945',
             '320x196' => 'Cisco 7962 | Cisco 7961 | Cisco 7942 | Cisco 7941',
             '320x216' => 'Cisco 7975',
-            '640x480' => 'Cisco 9971 | Cisco 9951'
+            '640x480' => 'Cisco 9971 | Cisco 9951',
+            '800x400' => 'Cisco 8861'
         ];
 
         $this->crud->addColumns([
@@ -97,7 +98,7 @@ class BgImageCrudController extends CrudController
                 'type' => 'select2_from_array',
                 'options' => \App\Models\BgImage::availableDevicePools(),
                 'allows_null' => false,
-                 'allows_multiple' => true, // OPTIONAL; needs you to cast this to array in your model;
+                'allows_multiple' => true, // OPTIONAL; needs you to cast this to array in your model;
             ],
         ]);
 
@@ -132,7 +133,7 @@ class BgImageCrudController extends CrudController
         Log::info("BgImageCrudController@store: Added `image` request param");
 
         Log::info("BgImageCrudController@store: Adding Device Pools to device_pools");
-        if(in_array('All', $request->get('device_pools'))) {
+        if (in_array('All', $request->get('device_pools'))) {
             $request->request->remove('device_pools');
             $request->request->add(['device_pools' => ['All']]);
         }
@@ -149,7 +150,7 @@ class BgImageCrudController extends CrudController
     {
         // TODO: Fix issue with moving files when one exists with the same name
 
-        if($request->has('full_image')) {
+        if ($request->has('full_image')) {
             Log::info("BgImageCrudController@update: Request is updating image files");
 
             $dimensions = $request->dimensions;
@@ -177,7 +178,7 @@ class BgImageCrudController extends CrudController
         }
 
         Log::info("BgImageCrudController@update: Adding Device Pools to device_pools");
-        if(in_array('All', $request->get('device_pools'))) {
+        if (in_array('All', $request->get('device_pools'))) {
             $request->request->remove('device_pools');
             $request->request->add(['device_pools' => ['All']]);
         }

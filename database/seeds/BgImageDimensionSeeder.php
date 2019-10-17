@@ -61,9 +61,25 @@ class BgImageDimensionSeeder extends Seeder
                 'full_size' => '640x480',
                 'thumb' => '123x111'
             ],
+            'Cisco 8845' => [
+                'full_size' => '800x400',
+                'thumb' => '139x109'
+            ],
+            'Cisco 8851' => [
+                'full_size' => '800x400',
+                'thumb' => '139x109'
+            ],
+            'Cisco 8861' => [
+                'full_size' => '800x400',
+                'thumb' => '139x109'
+            ],
+            'Cisco 8865' => [
+                'full_size' => '800x400',
+                'thumb' => '139x109'
+            ],
         ];
 
-        foreach($dimensions as $key => $val) {
+        foreach ($dimensions as $key => $val) {
             BgImageDimension::firstOrCreate([
                 'model' => $key,
                 'full_size' => $val['full_size'],

@@ -128,12 +128,16 @@ class PhoneController
                 Log::error("PhoneController@deleteItl: Setting ITL Process to fail.  Checking if this was the " .
                     "first issued key command");
                 if ($index == 0) {
+                    Log::error("PhoneController@deleteItl: Setting ITL Process to fail.  Timed out on first API request ");
+                    $itlHistory->fail_reason = 'Timeout on first API request.';
                     $itlHistory->status = 'finished';
                     $itlHistory->result = 'fail';
                     $itlHistory->save();
                     return false;
                 } else {
-                    $itlHistory->fail_reason = 'Note: timed out after first key.';
+                    Log::error("PhoneController@deleteItl: Setting ITL Process to fail.  " .
+                        "Timed out after successful API requests (phone might be rebooting)");
+                    $itlHistory->fail_reason = 'Timeout after successful API requests (phone might be rebooting)';
                     $itlHistory->status = 'finished';
                     $itlHistory->result = 'success';
                     $itlHistory->save();
@@ -189,20 +193,19 @@ class PhoneController
             } else {
                 if ($this->hasAlreadyTimedOut) {
                     Log::error("PhoneController@pushBackgroundImage: Received second Guzzle HTTP Client Timeout.");
+                    Log::error("PhoneController@pushBackgroundImage: Considering this try a fail.  Storing results.");
                     $bgImageHistory->fail_reason = 'timeout';
+                    $bgImageHistory->status = 'finished';
+                    $bgImageHistory->result = 'fail';
+                    $bgImageHistory->save();
+                    return false;
                 } else {
                     Log::error("PhoneController@pushBackgroundImage: This is the first timeout in the request series.  We'll try it once more.");
                     $this->hasAlreadyTimedOut = true;
                     Log::error("PhoneController@pushBackgroundImage: Set hasAlreadyTimedOut to $this->hasAlreadyTimedOut.");
-                    $this->pushBackgroundImage($bgImageHistory->image);
+                    $this->pushBackgroundImage($bgImageHistory);
                 }
             }
-
-            Log::error("PhoneController@pushBackgroundImage: Considering this try a fail.  Storing results.");
-            $bgImageHistory->status = 'finished';
-            $bgImageHistory->result = 'fail';
-            $bgImageHistory->save();
-            return false;
         }
     }
 
@@ -216,7 +219,7 @@ class PhoneController
         try {
             $response = $this->client->get('CGI/Screenshot', [
                 'sink' => storage_path("app/public/screenshots/{$bgImageHistory->id}_{$this->phone->name}.png")
-                ]);
+            ]);
 
             Log::info("PhoneController@savePhoneScreenShot: Received Guzzle HTTP Response from IP Phone - ", [
                 $response->getReasonPhrase()
