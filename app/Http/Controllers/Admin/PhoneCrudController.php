@@ -141,7 +141,7 @@ class PhoneCrudController extends CrudController
             }
         });
 
-        $phoneModels = Phone::distinct('model')->pluck('model')->toArray();
+        $phoneModels = Phone::orderBy('model')->distinct('model')->pluck('model')->toArray();
         $this->crud->addFilter([
             'name' => 'model',
             'type' => 'select2_multiple',
@@ -152,7 +152,7 @@ class PhoneCrudController extends CrudController
             }
         });
 
-        $devicePools = Phone::distinct('device_pool')->pluck('device_pool')->toArray();
+        $devicePools = Phone::orderBy('device_pool')->distinct('device_pool')->pluck('device_pool')->toArray();
         $this->crud->addFilter([
             'name' => 'device_pool',
             'type' => 'select2_multiple',
