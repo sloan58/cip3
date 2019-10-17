@@ -91,12 +91,101 @@ class PhoneCrudController extends CrudController
         $this->crud->removeAllButtons();
         $this->crud->enableDetailsRow();
         $this->crud->allowAccess('details_row');
+        $this->crud->enableExportButtons();
 
         // Custom Buttons
         $this->crud->addButtonFromView('line', 'phone_delete_itl', 'phone_delete_itl', 'beginning');
         $this->crud->addButtonFromView('line', 'phone_push_background', 'phone_push_background', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'export_phones', 'exportPhones', 'beginning');
         $this->crud->addButtonFromModelFunction('top', 'bulk_delete_itl', 'bulkDeleteItl', 'end');
+
+        // Filters
+        $this->crud->addFilter(
+            [
+                'type' => 'text',
+                'name' => 'name',
+                'label' => 'Name'
+            ],
+            false,
+            function ($value) {
+                $this->crud->addClause('where', 'name', 'LIKE', "%$value%");
+            }
+        );
+
+        $this->crud->addFilter(
+            [
+                'type' => 'text',
+                'name' => 'description',
+                'label' => 'Description'
+            ],
+            false,
+            function ($value) {
+                $this->crud->addClause('where', 'description', 'LIKE', "%$value%");
+            }
+        );
+
+        $phoneStatuses = [
+            'Registered',
+            'PartiallyRegistered',
+            'UnRegistered',
+            'Rejected',
+            'Unknown'
+        ];
+        $this->crud->addFilter([
+            'name' => 'status',
+            'type' => 'select2_multiple',
+            'label' => 'Status'
+        ], array_combine($phoneStatuses, $phoneStatuses), function ($values) {
+            foreach (json_decode($values) as $key => $value) {
+                $this->crud->addClause('orWhere', 'status', $value);
+            }
+        });
+
+        $phoneModels = Phone::distinct('model')->pluck('model')->toArray();
+        $this->crud->addFilter([
+            'name' => 'model',
+            'type' => 'select2_multiple',
+            'label' => 'Model'
+        ], array_combine($phoneModels, $phoneModels), function ($values) {
+            foreach (json_decode($values) as $key => $value) {
+                $this->crud->addClause('orWhere', 'model', $value);
+            }
+        });
+
+        $devicePools = Phone::distinct('device_pool')->pluck('device_pool')->toArray();
+        $this->crud->addFilter([
+            'name' => 'device_pool',
+            'type' => 'select2_multiple',
+            'label' => 'Device Pool'
+        ], array_combine($devicePools, $devicePools), function ($values) {
+            foreach (json_decode($values) as $key => $value) {
+                $this->crud->addClause('orWhere', 'device_pool', $value);
+            }
+        });
+
+        $this->crud->addFilter(
+            [
+                'type' => 'text',
+                'name' => 'owner',
+                'label' => 'Owner'
+            ],
+            false,
+            function ($value) {
+                $this->crud->addClause('where', 'owner_user_name', 'LIKE', "%$value%");
+            }
+        );
+
+        $this->crud->addFilter(
+            [
+                'type' => 'text',
+                'name' => 'ip_address',
+                'label' => 'IP Address'
+            ],
+            false,
+            function ($value) {
+                $this->crud->addClause('where', 'ip_address', 'LIKE', "%$value%");
+            }
+        );
 
         // add asterisk for fields that are required in PhoneRequest
         $this->crud->setRequiredFields(StoreRequest::class, 'create');
