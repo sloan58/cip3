@@ -43,17 +43,23 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
     private $image;
 
     /**
+     * Fetch current RISPort data for this phone
+     */
+    private $refreshRealtimeData;
+
+    /**
      * Create a new job instance.
      *
      * @param Phone $phone
      * @param $requestedBy
      * @param $image
      */
-    public function __construct(Phone $phone, $requestedBy, $image)
+    public function __construct(Phone $phone, $requestedBy, $image, $refreshRealtimeData = false)
     {
         $this->phone = $phone;
         $this->requestedBy = $requestedBy;
         $this->image = $image;
+        $this->refreshRealtimeData = $refreshRealtimeData;
     }
 
     /**
@@ -76,13 +82,16 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
         $bgImageHistory->phone = $this->phone->name;
         $bgImageHistory->requested_by = $this->requestedBy;
 
-        Log::info('PushPhoneBackgroundImageJob@handle: Pulling latest realtime information for this phone');
-        $ris = new RisPortSoap($this->phone->ucm, false);
-        $ris->collectRealtimeData([$this->phone->name]);
+        if ($this->refreshRealtimeData) {
+            Log::info('PushPhoneBackgroundImageJob@handle: Pulling latest realtime information for this phone');
+            $ris = new RisPortSoap($this->phone->ucm, false);
+            $ris->collectRealtimeData([$this->phone->name]);
+        }
 
         Log::info('PushPhoneBackgroundImageJob@handle: Checking if phone is registered and has an IP Address');
-        if(!$this->phone->isRegistered() || is_null($this->phone->currentIpAddress())) {
-            Log::info('PushPhoneBackgroundImageJob@handle: The phone is either not registered or does not have an IP address',
+        if (!$this->phone->isRegistered() || is_null($this->phone->currentIpAddress())) {
+            Log::info(
+                'PushPhoneBackgroundImageJob@handle: The phone is either not registered or does not have an IP address',
                 ['Status' => $this->phone->status, 'IPAddress' => $this->phone->currentIpAddress()]
             );
 
@@ -99,7 +108,7 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
         Log::info('PushPhoneBackgroundImageJob@handle: Checking if phone supports background image push');
         $axl = new AxlSoap($this->phone->ucm);
         $supportsBgPush = $axl->supportsBackgroundApi($this->phone);
-        if(!$supportsBgPush['success']) {
+        if (!$supportsBgPush['success']) {
             $bgImageHistory->status = 'finished';
             $bgImageHistory->result = 'fail';
             $bgImageHistory->fail_reason = $supportsBgPush['reason'];
@@ -112,7 +121,7 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
         Log::info('PushPhoneBackgroundImageJob@handle: Associating IP Phone with AXL User');
         $associated = $axl->associatePhoneWithAppUser($this->phone);
 
-        if(!$associated) {
+        if (!$associated) {
             Log::error('PushPhoneBackgroundImageJob@handle: Problem associating IP Phone with AXL User.  Failing ITL Delete');
             $bgImageHistory->status = 'finished';
             $bgImageHistory->result = 'fail';

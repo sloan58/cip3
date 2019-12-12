@@ -3,7 +3,6 @@
 
 namespace App\ApiClients;
 
-
 use App\Models\Phone;
 use Sabre\Xml\Reader;
 use GuzzleHttp\Client;
@@ -30,9 +29,8 @@ class PhoneController
      * PhoneController constructor.
      * @param Phone $phone
      */
-    function __construct(Phone $phone)
+    public function __construct(Phone $phone)
     {
-
         $this->client = new Client([
             'base_uri' => 'http://' . $phone->currentIpAddress(),
             'verify' => false,
@@ -61,7 +59,6 @@ class PhoneController
             $this->phone->itl->sequence
         ]);
         foreach ($this->phone->itl->sequence as $index => $keyPress) {
-
             Log::debug("PhoneController@deleteItl: Processing key {$keyPress}");
 
             if ($keyPress == "Key:Sleep") {
@@ -74,7 +71,6 @@ class PhoneController
 
             Log::debug("PhoneController@deleteItl: Calling IP Phone API");
             try {
-
                 $response = $this->client->post('http://' . $this->phone->currentIpAddress() . '/CGI/Execute', ['body' => $xml]);
 
                 $this->reader->xml($response->getBody()->getContents());
@@ -108,7 +104,6 @@ class PhoneController
                     return false;
                 }
             } catch (RequestException $e) {
-
                 Log::error("PhoneController@deleteItl: Got an error in the API response", [$e->getMessage()]);
 
                 /*
@@ -215,6 +210,7 @@ class PhoneController
      */
     private function savePhoneScreenShot(BgImageHistory $bgImageHistory)
     {
+        sleep(5);
         Log::info('PhoneController@savePhoneScreenShot: Saving screen shot of the IP Phone');
         try {
             $response = $this->client->get('CGI/Screenshot', [

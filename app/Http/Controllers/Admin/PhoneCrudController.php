@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\BgImage;
 use App\Models\Phone;
+use App\Models\BgImage;
 use App\Jobs\DeleteItlJob;
 use Backpack\CRUD\CrudPanel;
 use Illuminate\Http\Request;
