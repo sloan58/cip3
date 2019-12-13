@@ -48,13 +48,18 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
     private $refreshRealtimeData;
 
     /**
+     * Associate the phone to the application user
+     */
+    private $associatePhone;
+
+    /**
      * Create a new job instance.
      *
      * @param Phone $phone
      * @param $requestedBy
      * @param $image
      */
-    public function __construct(Phone $phone, $requestedBy, $image, $refreshRealtimeData = false)
+    public function __construct(Phone $phone, $requestedBy, $image, $refreshRealtimeData = false, $associatePhone = false)
     {
         $this->phone = $phone;
         $this->requestedBy = $requestedBy;
@@ -118,16 +123,18 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
 
         Log::info('PushPhoneBackgroundImageJob@handle: Background image push is supported!');
 
-        Log::info('PushPhoneBackgroundImageJob@handle: Associating IP Phone with AXL User');
-        $associated = $axl->associatePhoneWithAppUser($this->phone);
-
-        if (!$associated) {
-            Log::error('PushPhoneBackgroundImageJob@handle: Problem associating IP Phone with AXL User.  Failing ITL Delete');
-            $bgImageHistory->status = 'finished';
-            $bgImageHistory->result = 'fail';
-            $bgImageHistory->fail_reason = 'Could not associated AXL User';
-            $bgImageHistory->save();
-            exit;
+        if ($associatePhone) {
+            Log::info('PushPhoneBackgroundImageJob@handle: Associating IP Phone with AXL User');
+            $associated = $axl->associatePhoneWithAppUser($this->phone);
+    
+            if (!$associated) {
+                Log::error('PushPhoneBackgroundImageJob@handle: Problem associating IP Phone with AXL User.  Failing ITL Delete');
+                $bgImageHistory->status = 'finished';
+                $bgImageHistory->result = 'fail';
+                $bgImageHistory->fail_reason = 'Could not associated AXL User';
+                $bgImageHistory->save();
+                exit;
+            }
         }
 
         Log::info('PushPhoneBackgroundImageJob@handle: Associated IP Phone with AXL User successfully');
