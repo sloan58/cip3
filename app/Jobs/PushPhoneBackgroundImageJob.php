@@ -124,7 +124,7 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
 
         Log::info('PushPhoneBackgroundImageJob@handle: Background image push is supported!');
 
-        if ($associatePhone) {
+        if ($this->associatePhone) {
             Log::info('PushPhoneBackgroundImageJob@handle: Associating IP Phone with AXL User');
             $associated = $axl->associatePhoneWithAppUser($this->phone);
     
