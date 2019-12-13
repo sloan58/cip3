@@ -58,10 +58,18 @@ class BulkImageProvisioningCommand extends Command
                             ->phones()
                             ->where('name', $data[0])
                             ->first();
-            $image = BgImage::where('name', $data[1])->first();
+            if (!$phone) {
+                \Log::error('Cloud not locate phone', [
+                    'csvPhone' => $data[0],
+                    'csvUcm' => $data[2],
+                    'dbPhone' => $phone,
+                ]);
+                continue;
+            }
+            $image = $phone->bgImages()->where('name', $data[1])->first();
 
-            if (!$phone || !$image) {
-                \Log::error('Cloud not locate phone or image', [
+            if (!$image) {
+                \Log::error('Cloud not locate image', [
                     'csvPhone' => $data[0],
                     'csvImage' => $data[1],
                     'csvUcm' => $data[2],

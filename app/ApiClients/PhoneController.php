@@ -190,10 +190,6 @@ class PhoneController
                     Log::error("PhoneController@pushBackgroundImage: Received second Guzzle HTTP Client Timeout.");
                     Log::error("PhoneController@pushBackgroundImage: Considering this try a fail.  Storing results.");
                     $bgImageHistory->fail_reason = 'timeout';
-                    $bgImageHistory->status = 'finished';
-                    $bgImageHistory->result = 'fail';
-                    $bgImageHistory->save();
-                    return false;
                 } else {
                     Log::error("PhoneController@pushBackgroundImage: This is the first timeout in the request series.  We'll try it once more.");
                     $this->hasAlreadyTimedOut = true;
@@ -201,6 +197,10 @@ class PhoneController
                     $this->pushBackgroundImage($bgImageHistory);
                 }
             }
+            $bgImageHistory->status = 'finished';
+            $bgImageHistory->result = 'fail';
+            $bgImageHistory->save();
+            return false;
         }
     }
 
