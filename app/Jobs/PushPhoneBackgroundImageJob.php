@@ -65,6 +65,7 @@ class PushPhoneBackgroundImageJob implements ShouldQueue
         $this->requestedBy = $requestedBy;
         $this->image = $image;
         $this->refreshRealtimeData = $refreshRealtimeData;
+        $this->associatePhone = $associatePhone;
     }
 
     /**
