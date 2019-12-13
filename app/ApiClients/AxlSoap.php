@@ -98,11 +98,41 @@ class AxlSoap extends SoapClient
 
             return true;
         } catch (SoapFault $e) {
-
             Log::error("AxlSoap@ping ({$this->ucm->name}): UCM Ping fail", [
                 $e->getMessage()
             ]);
 
+            return false;
+        }
+    }
+
+    public function bulkAssociatePhoneWithAppUser($phoneNames)
+    {
+        Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Associating IP Phones " .
+            "with Application User {$this->ucm->username}");
+
+        Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Getting current associated phones");
+        $phonesToAssociate = $this->bulkBuildAssociatedPhonesArray($phoneNames);
+
+        Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Calling API to associate phones");
+        try {
+            $res = $this->updateAppUser([
+                'userid' => $this->ucm->username,
+                'associatedDevices' => [
+                    'device' => $phonesToAssociate
+                ]
+            ]);
+
+            Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Received successful response");
+            Log::debug("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Response data", [
+                $res->return
+            ]);
+
+            return true;
+        } catch (SoapFault $e) {
+            Log::error("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Received unsuccessful response", [
+                $e->getMessage()
+            ]);
             return false;
         }
     }
@@ -113,15 +143,14 @@ class AxlSoap extends SoapClient
             "with Application User {$phone->ucm->username}");
 
         Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Getting current associated phones");
-        $phones = $this->buildAssociatedPhonesArray($phone);
-        dump($phones);
+        $phonesToAssociate = $this->buildAssociatedPhonesArray($phone);
 
         Log::info("AxlSoap@associatePhoneWithAppUser ({$this->ucm->name}): Calling API to associate phones");
         try {
             $res = $this->updateAppUser([
                 'userid' => $phone->ucm->username,
                 'associatedDevices' => [
-                    'device' => $phones
+                    'device' => $phonesToAssociate
                 ]
             ]);
 
@@ -194,7 +223,6 @@ class AxlSoap extends SoapClient
             return true;
         } catch (SoapFault $e) {
             if (preg_match('/Query request too large/', $e->faultstring)) {
-
                 Log::error("AxlSoap@syncPhones ({$this->ucm->name}): Received throttle notification from AXL");
                 Log::debug("AxlSoap@syncPhones ({$this->ucm->name}): Last AXL Request", [
                     $this->__getLastRequest()
@@ -259,7 +287,6 @@ class AxlSoap extends SoapClient
 
 
                 if (setting('teams_enable_notifications')) {
-
                     Log::info(
                         "AxlSoap@syncPhones ({$this->ucm->name}): Webex Teams notifications enabled.  Sending error message now."
                     );
@@ -374,6 +401,49 @@ class AxlSoap extends SoapClient
                 'success' => false,
                 'reason' => 'AXL API error (Check logs)'
             ];
+        }
+    }
+
+    /**
+     * @param $phone
+     * @return array
+     */
+    private function bulkBuildAssociatedPhonesArray($phoneNames)
+    {
+        Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Getting App User associations");
+        try {
+            $res = $this->getAppUser([
+                'userid' => $this->ucm->username,
+            ]);
+
+            Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Received successful response");
+            Log::debug("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Response data", [
+                $res->return
+            ]);
+
+            if (!isset($res->return->appUser->associatedDevices->device)) {
+                Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): No Phones currently associated" .
+                    " to this user.  Returning the input Phones");
+                return $phoneNames;
+            }
+
+            Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Merging associated Phones and" .
+                " new phones", [$res->return->appUser->associatedDevices->device]);
+            $phoneArray = array_merge($phoneNames, (array) $res->return->appUser->associatedDevices->device);
+
+            Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Removing duplicate Phone names");
+            $phoneArray = array_unique($phoneArray);
+
+            Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Resetting array keys");
+            $phoneArray = array_values($phoneArray);
+
+            Log::info("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Returning Phone array", [$phoneArray]);
+            return $phoneArray;
+        } catch (SoapFault $e) {
+            Log::error("AxlSoap@buildAssociatedPhonesArray ({$this->ucm->name}): Received unsuccessful response", [
+                $e->getMessage()
+            ]);
+            return [$phoneNames];
         }
     }
 
