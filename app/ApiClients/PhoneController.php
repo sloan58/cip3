@@ -229,4 +229,28 @@ class PhoneController
             }
         }
     }
+
+    /**
+     * Save a copy of the IP Phone screen shot after pushing a new image
+     */
+    public function savePhoneScreenShotLite()
+    {
+        Log::info('PhoneController@savePhoneScreenShot: Saving screen shot of the IP Phone');
+        try {
+            $response = $this->client->get('CGI/Screenshot', [
+                'sink' => storage_path("app/public/screenshots/lite/{$this->phone->name}.png")
+            ]);
+
+            Log::info("PhoneController@savePhoneScreenShot: Received Guzzle HTTP Response from IP Phone - ", [
+                $response->getReasonPhrase()
+            ]);
+        } catch (RequestException $e) {
+            if ($e->hasResponse()) {
+                Log::error("PhoneController@savePhoneScreenShot: Received Guzzle HTTP Client Error - ", [
+                    'Response' => $e->getResponse()->getBody(),
+                    'Request' => $e->getRequest()->getBody()
+                ]);
+            }
+        }
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Console\Commands\BackgroundImages;
 
 use App\Models\Ucm;
 use App\ApiClients\AxlSoap;
+use App\ApiClients\PhoneController;
 use App\ApiClients\RisPortSoap;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -95,6 +96,8 @@ class VerifyPhoneReadiness extends Command
                     Log::info(__METHOD__ . ": $phoneName supportsBackground was successful");
                     $message = sprintf('%s is ready', $phone->name);
                     Log::info("VerifyResults ($fileName): $message");
+                    $phoneController = new PhoneController($phone);
+                    $phoneController->savePhoneScreenShotLite();
                 } else {
                     Log::info(__METHOD__ . ": $phoneName supportsBackground was unsuccessful");
                     $message = sprintf('%s is not ready due to : %s', $phone->name, $results['reason']);
