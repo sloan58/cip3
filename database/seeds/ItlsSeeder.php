@@ -427,6 +427,22 @@ class ItlsSeeder extends Seeder
                     ]
                 ],
                 [
+                    'model' => 'Cisco 7811',
+                    'sequence' => [
+                        'Init:Settings',
+                        'Key:Sleep',
+                        'Key:Settings',
+                        'Key:Sleep',
+                        'Key:KeyPad5',
+                        'Key:Sleep',
+                        'Key:KeyPad4',
+                        'Key:Sleep',
+                        'Key:KeyPad4',
+                        'Key:Sleep',
+                        'Key:Soft2',
+                    ]
+                ],
+                [
                     'model' => 'Cisco 7821',
                     'sequence' => [
                         'Init:Settings',
@@ -437,7 +453,7 @@ class ItlsSeeder extends Seeder
                         'Key:Sleep',
                         'Key:KeyPad4',
                         'Key:Sleep',
-                        'Key:Soft4',
+                        'Key:KeyPad4',
                         'Key:Sleep',
                         'Key:Soft2',
                     ]
@@ -453,7 +469,7 @@ class ItlsSeeder extends Seeder
                         'Key:Sleep',
                         'Key:KeyPad4',
                         'Key:Sleep',
-                        'Key:Soft4',
+                        'Key:KeyPad4',
                         'Key:Sleep',
                         'Key:Soft2',
                     ]
@@ -469,7 +485,7 @@ class ItlsSeeder extends Seeder
                         'Key:Sleep',
                         'Key:KeyPad4',
                         'Key:Sleep',
-                        'Key:Soft4',
+                        'Key:KeyPad4',
                         'Key:Sleep',
                         'Key:Soft2',
                     ]

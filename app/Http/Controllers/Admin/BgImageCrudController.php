@@ -40,7 +40,7 @@ class BgImageCrudController extends CrudController
             '320x196' => 'Cisco 7962 | Cisco 7961 | Cisco 7942 | Cisco 7941',
             '320x216' => 'Cisco 7975',
             '640x480' => 'Cisco 9971 | Cisco 9951',
-            '800x400' => 'Cisco 8861'
+            '800x400' => 'Cisco 8845 | Cisco 8851 | Cisco 8861'
         ];
 
         $this->crud->addColumns([

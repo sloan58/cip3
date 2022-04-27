@@ -74,7 +74,9 @@ class Phone extends Model
      */
     public function isRegistered()
     {
-        return $this->realtime_data[0]['Status'] == 'Registered' ? true : false;
+        if(isset($this->realtime_data[0])) {
+            return $this->realtime_data[0]['Status'] == 'Registered' ? true : false;
+        }
     }
 
     /**
