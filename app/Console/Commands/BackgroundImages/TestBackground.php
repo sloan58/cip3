@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\BackgroundImages;
 
 use App\Models\Phone;
 use Illuminate\Console\Command;
@@ -39,9 +39,8 @@ class TestBackground extends Command
      */
     public function handle()
     {
-//        $file = Storage::url('backgrounds/MD_District_Seal.png');
+        //        $file = Storage::url('backgrounds/MD_District_Seal.png');
         $phone = Phone::where('name', 'SEP001D452CDDB1')->first();
         PushPhoneBackgroundImageJob::dispatch($phone, \App\User::first()->email, 'MD_District_Seal.png');
-
     }
 }

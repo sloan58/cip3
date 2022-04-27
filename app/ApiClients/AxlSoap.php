@@ -391,6 +391,30 @@ class AxlSoap extends SoapClient
                 ];
             }
 
+
+            $ch = curl_init("http://{$phone->currentIpAddress()}");
+            curl_setopt_array($ch, [
+                CURLOPT_AUTOREFERER    => true,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_ENCODING       => "",
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS      => 1,
+                CURLOPT_NOBODY         => true,
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_TIMEOUT        => 5,
+                CURLOPT_USERAGENT      => "Mozilla/5.0 (compatible; StackOverflow/0.0.1; +https://codereview.stackexchange.com/)",
+            ]);
+            curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($code !== 200) {
+                return [
+                    'success' => false,
+                    'reason' => 'Phone web interface is inaccessible'
+                ];
+            }
+
             Log::info("AxlSoap@supportsBackgroundApi ({$this->ucm->name}): Load and Phone Personalization settings pass checks.");
             return [
                 'success' => true

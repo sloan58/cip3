@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\BackgroundImages;
 
 use App\Models\Ucm;
 use App\Models\Phone;
@@ -60,7 +60,7 @@ class BulkImageProvisioningCommand extends Command
         Log::info("BulkImageProvisioningCommand@handle: Collecting UCM IP address");
         $ucmIp = $this->ask('What is the IP Address of the UCM Server?');
         $ucm = Ucm::where('ip_address', $ucmIp)->first();
-        
+
         Log::info("BulkImageProvisioningCommand@handle: Received $ucmIp");
         if (!$ucm) {
             Log::info("BulkImageProvisioningCommand@handle: Could not locate a DB record with ip address of $ucmIp.  Exiting");
