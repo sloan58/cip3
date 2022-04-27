@@ -411,7 +411,7 @@ class AxlSoap extends SoapClient
             if ($code !== 200) {
                 return [
                     'success' => false,
-                    'reason' => 'Phone web interface is inaccessible'
+                    'reason' => "Phone web interface is inaccessible ($code)"
                 ];
             }
 
