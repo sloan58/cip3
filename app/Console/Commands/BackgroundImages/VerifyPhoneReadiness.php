@@ -4,6 +4,7 @@ namespace App\Console\Commands\BackgroundImages;
 
 use App\Models\Ucm;
 use App\ApiClients\AxlSoap;
+use App\ApiClients\RisPortSoap;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -79,19 +80,29 @@ class VerifyPhoneReadiness extends Command
         Log::info(__METHOD__ . ": Creating AxlSoap client");
         $axl = new AxlSoap($ucm);
 
+        Log::info(__METHOD__ . ": Iterating phones");
         foreach ($phones as $phoneName) {
+            Log::info(__METHOD__ . ": Working phone $phoneName");
             if ($phone = $ucm->phones()->where('name', $phoneName)->first()) {
+                Log::info(__METHOD__ . ": $phoneName found in DB");
+                $ris = new RisPortSoap($phone->ucm, false);
+                $ris->collectRealtimeData([$phone->name]);
+                Log::info(__METHOD__ . ": Collected realtime data for $phoneName");
+
                 $results = $axl->supportsBackgroundApi($phone);
-                if (!$results['success']) {
+                Log::info(__METHOD__ . ": Received supportsBackground API response for $phoneName");
+                if ($results['success']) {
+                    Log::info(__METHOD__ . ": $phoneName supportsBackground was successful");
                     $message = sprintf('%s is ready', $phone->name);
-                    Log::info("VerifyResults: $message");
+                    Log::info("VerifyResults ($fileName): $message");
                 } else {
+                    Log::info(__METHOD__ . ": $phoneName supportsBackground was unsuccessful");
                     $message = sprintf('%s is not ready due to : %s', $phone->name, $results['reason']);
-                    Log::info("VerifyResults: $message");
+                    Log::info("VerifyResults ($fileName): $message");
                 }
             } else {
                 $message = sprintf('%s does not exist in CIP3', $phoneName);
-                Log::info("VerifyResults: $message");
+                Log::info("VerifyResults ($fileName): $message");
             }
         }
     }
