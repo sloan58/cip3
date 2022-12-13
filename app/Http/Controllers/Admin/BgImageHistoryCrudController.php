@@ -52,6 +52,8 @@ class BgImageHistoryCrudController extends CrudController
             ]
         );
 
+        $this->crud->orderBy('updated_at', 'DESC');
+
         // Remove buttons
         $this->crud->removeButtonFromStack('update', 'line');
 
